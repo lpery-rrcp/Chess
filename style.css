@@ -37,7 +37,7 @@ body{
     bottom: 4%;
     left: 4%;
     position: absolute;
-    font-size: 12px;
+    font-size: clamp(8px, 1vw, 12px);
     font-weight: bold;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
@@ -54,6 +54,18 @@ body{
     color: #b58863
 }
 
+.piece {
+    width: 100%;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.piece img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+}
+
 @media (min-width:600px) {
     .chessBoard{
         width: 600px;
@@ -63,7 +75,7 @@ body{
 
 @media (max-width:600px) {
     .coordinate{
-        font-size: 800px;
+        font-size: 8px;
     }
 }
 
