@@ -41,6 +41,12 @@ body{
     font-weight: bold;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
+.rank{
+    top: 4%;
+    right: 4%;
+    left: auto;
+
+}
 .whiteText{
     color: #f0d9b5
 }
@@ -52,6 +58,12 @@ body{
     .chessBoard{
         width: 600px;
         height: 600px;
+    }
+}
+
+@media (max-width:600px) {
+    .coordinate{
+        font-size: 800px;
     }
 }
 
