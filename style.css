@@ -31,6 +31,17 @@ body{
     background-color: #b58863;
 }
 
+.coordinate {
+    height:auto;
+    display:flex;
+    bottom: 4%;
+    left: 4%;
+    position: absolute;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
 @media (min-width:600px) {
     .chessBoard{
         width: 600px;
