@@ -41,6 +41,12 @@ body{
     font-weight: bold;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
+.whiteText{
+    color: #f0d9b5
+}
+.blackText{
+    color: #b58863
+}
 
 @media (min-width:600px) {
     .chessBoard{
