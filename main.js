@@ -1,75 +1,157 @@
-let legalSquares = [];
-let isWhiteTurn = true;
-// Get all board squares and pieces
-const BOARD_SQUARES = document.getElementsByClassName("square");
-const PIECES = document.getElementsByClassName("piece");
-const PIECES_IMAGES = document.getElementsByTagName("img");
+const boardElement = document.getElementById("chess-board");
 
-setupBoardSquares();
-setupPieces();
+const pieceNames = {
+  r: "Rook",
+  n: "Knight",
+  b: "Bishop",
+  q: "Queen",
+  k: "King",
+  p: "Pawn"
+};
 
-// --- Setup Functions ---
-function setupBoardSquares() {
-    for (let i = 0; i < BOARD_SQUARES.length; i++) {
-        const square = BOARD_SQUARES[i];
+const initialBoard = [
+  ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+  ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
+  ["", "", "", "", "", "", "", ""],
+  ["", "", "", "", "", "", "", ""],
+  ["", "", "", "", "", "", "", ""],
+  ["", "", "", "", "", "", "", ""],
+  ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+  ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
+];
 
-        // Allow dropping on all squares
-        square.addEventListener("dragover", allowDrop);
-        square.addEventListener("drop", drop);
-        square.addEventListener("dragenter", highlightSquare);
-        square.addEventListener("dragleave", unhighlightSquare);
+let boardState = initialBoard.map((row) => [...row]);
+let draggedPiece = null;
 
-        // Give each square an id like "a8", "b8", etc.
-        let row = 8 - Math.floor(i / 8);
-        let col = String.fromCharCode(97 + (i % 8)); // 'a' = 97
-        square.id = col + row;
+renderBoard();
+
+boardElement.addEventListener("dragstart", handleDragStart);
+boardElement.addEventListener("dragover", handleDragOver);
+boardElement.addEventListener("dragleave", handleDragLeave);
+boardElement.addEventListener("drop", handleDrop);
+boardElement.addEventListener("dragend", clearHighlight);
+
+function renderBoard() {
+  boardElement.innerHTML = "";
+
+  for (let row = 0; row < 8; row += 1) {
+    for (let col = 0; col < 8; col += 1) {
+      const square = document.createElement("div");
+      const file = String.fromCharCode(97 + col);
+      const rank = 8 - row;
+
+      square.className = `square ${(row + col) % 2 === 0 ? "white" : "black"}`;
+      square.id = `${file}${rank}`;
+      square.dataset.row = String(row);
+      square.dataset.col = String(col);
+
+      if (row === 0) {
+        const rankLabel = document.createElement("span");
+        rankLabel.className = "coordinate rank";
+        rankLabel.textContent = String(rank);
+        square.appendChild(rankLabel);
+      }
+
+      if (col === 7) {
+        const fileLabel = document.createElement("span");
+        fileLabel.className = "coordinate file";
+        fileLabel.textContent = file;
+        square.appendChild(fileLabel);
+      }
+
+      const pieceCode = boardState[row][col];
+      if (pieceCode) {
+        square.appendChild(createPiece(pieceCode));
+      }
+
+      boardElement.appendChild(square);
     }
+  }
 }
 
-function setupPieces() {
-    for (let i = 0; i < PIECES.length; i++) {
-        const piece = PIECES[i];
-        piece.setAttribute("draggable", true);
-        piece.addEventListener("dragstart", drag);
+function createPiece(pieceCode) {
+  const color = pieceCode.startsWith("w") ? "white" : "black";
+  const type = pieceCode[1].toLowerCase();
+  const label = pieceNames[type];
+  const colorLabel = color === "white" ? "White" : "Black";
 
-        // Give each piece a unique id (e.g., "Rooka8")
-        const name = piece.classList[1] || "piece";
-        const square = piece.parentElement.id || "";
-        piece.id = `${name}_${square}`;
-    }
+  const piece = document.createElement("div");
+  piece.className = `piece ${label.toLowerCase()} ${color}`;
+  piece.dataset.type = type;
+  piece.dataset.color = color;
+  piece.draggable = true;
 
-    // Prevent images from interfering with drag events
-    for (let i = 0; i < PIECES_IMAGES.length; i++) {
-        PIECES_IMAGES[i].setAttribute("draggable", false);
-    }
+  const image = document.createElement("img");
+  image.src = `PNG/${colorLabel}_Pieces/${colorLabel}-${label}.png`;
+  image.alt = `${colorLabel} ${label}`;
+  image.draggable = false;
+
+  piece.appendChild(image);
+  return piece;
 }
 
-// --- Drag and Drop Handlers ---
-function allowDrop(ev) {
-    ev.preventDefault(); // Important so drop works
+function handleDragStart(event) {
+  const piece = event.target.closest(".piece");
+
+  if (!piece) {
+    return;
+  }
+
+  draggedPiece = piece.parentElement;
+  event.dataTransfer.setData("text/plain", draggedPiece.id);
+  piece.classList.add("dragging");
 }
 
-function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
+function handleDragOver(event) {
+  event.preventDefault();
+
+  const square = event.target.closest(".square");
+  if (square) {
+    square.classList.add("hover");
+  }
 }
 
-function drop(ev) {
-    ev.preventDefault();
-    const pieceId = ev.dataTransfer.getData("text");
-    const piece = document.getElementById(pieceId);
-    const square = ev.currentTarget;
-
-    // Remove highlight when dropped
-    square.classList.remove("highlight");
-
-    // Move piece into new square
-    square.appendChild(piece);
+function handleDragLeave(event) {
+  const square = event.target.closest(".square");
+  if (square) {
+    square.classList.remove("hover");
+  }
 }
 
-function highlightSquare(ev) {
-    ev.currentTarget.classList.add("highlight");
+function handleDrop(event) {
+  event.preventDefault();
+
+  const targetSquare = event.target.closest(".square");
+  if (!targetSquare || !draggedPiece) {
+    return;
+  }
+
+  const sourceRow = Number(draggedPiece.dataset.row);
+  const sourceCol = Number(draggedPiece.dataset.col);
+  const targetRow = Number(targetSquare.dataset.row);
+  const targetCol = Number(targetSquare.dataset.col);
+
+  if (sourceRow === targetRow && sourceCol === targetCol) {
+    clearHighlight();
+    return;
+  }
+
+  const movedPiece = boardState[sourceRow][sourceCol];
+  boardState[targetRow][targetCol] = movedPiece;
+  boardState[sourceRow][sourceCol] = "";
+
+  clearHighlight();
+  renderBoard();
 }
 
-function unhighlightSquare(ev) {
-    ev.currentTarget.classList.remove("highlight");
+function clearHighlight() {
+  document.querySelectorAll(".square.hover").forEach((square) => {
+    square.classList.remove("hover");
+  });
+
+  document.querySelectorAll(".piece.dragging").forEach((piece) => {
+    piece.classList.remove("dragging");
+  });
+
+  draggedPiece = null;
 }
