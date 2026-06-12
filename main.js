@@ -137,6 +137,20 @@ function handleDrop(event) {
   }
 
   const movedPiece = boardState[sourceRow][sourceCol];
+  const targetPiece = boardState[targetRow][targetCol];
+
+  const pieceType = movedPiece ? movedPiece[1].toLowerCase() : "";
+
+  // Use the pawn-specific rule for pawns, and the basic rule for all other pieces.
+  const isMoveAllowed = pieceType === "p"
+    ? canPawnMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+    : canMoveTo(movedPiece, targetPiece);
+
+  if (!isMoveAllowed) {
+    clearHighlight();
+    return;
+  }
+
   boardState[targetRow][targetCol] = movedPiece;
   boardState[sourceRow][sourceCol] = "";
 
