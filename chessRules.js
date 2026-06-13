@@ -76,4 +76,17 @@ function canPawnMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCo
     return false;
 }
 
+function canKnightMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode) {
+        return false;
+    }
 
+    const rowDiff = Math.abs(targetRow - sourceRow);
+    const colDiff = Math.abs(targetCol - sourceCol);
+    
+    // Knight moves in an L-shape: 2 squares in one direction and 1 square in the perpendicular direction.
+    if ((rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)) {
+        return canMoveTo(pieceCode, targetPieceCode);
+    }  
+    return false;
+}

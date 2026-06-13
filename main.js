@@ -141,10 +141,12 @@ function handleDrop(event) {
 
   const pieceType = movedPiece ? movedPiece[1].toLowerCase() : "";
 
-  // Use the pawn-specific rule for pawns, and the basic rule for all other pieces.
+  // Use piece-specific rules for pawns and knights, and the basic rule for all other pieces.
   const isMoveAllowed = pieceType === "p"
     ? canPawnMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
-    : canMoveTo(movedPiece, targetPiece);
+    : pieceType === "n"
+      ? canKnightMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol)
+      : canMoveTo(movedPiece, targetPiece);
 
   if (!isMoveAllowed) {
     clearHighlight();
