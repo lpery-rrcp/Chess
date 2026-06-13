@@ -90,3 +90,30 @@ function canKnightMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetR
     }  
     return false;
 }
+
+function canBishopMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode) {
+        return false;
+    }
+
+    const rowDiff = Math.abs(targetRow - sourceRow);
+    const colDiff = Math.abs(targetCol - sourceCol);
+
+    // Bishop moves diagonally: the absolute difference between rows and columns must be the same.
+    if (rowDiff === colDiff) {
+        // Check if the path is clear (no pieces in between).
+        const rowStep = targetRow > sourceRow ? 1 : -1;
+        const colStep = targetCol > sourceCol ? 1 : -1;
+        let currentRow = sourceRow + rowStep;
+        let currentCol = sourceCol + colStep;
+        while (currentRow !== targetRow && currentCol !== targetCol) {
+            if (boardState[currentRow][currentCol]) {
+                return false; // Path is blocked by another piece.
+            }
+            currentRow += rowStep;
+            currentCol += colStep;
+        }
+        return canMoveTo(pieceCode, targetPieceCode);
+    }
+    return false;   
+}
