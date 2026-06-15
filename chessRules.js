@@ -30,6 +30,14 @@ function canMoveTo(pieceCode, targetPieceCode) {
     return !isSameColor(pieceCode, targetPieceCode);
 }
 
+function basicMoveValidation(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode) {
+        return false;
+    }
+    const pieceType = pieceCode[1].toLowerCase();
+}
+    
+
 // Pawn move validation following standard chess rules.
 // White pawns move toward smaller row numbers; black pawns move toward larger rows.
 function canPawnMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
@@ -116,4 +124,35 @@ function canBishopMove(pieceCode, targetPieceCode, boardState, sourceRow, source
         return canMoveTo(pieceCode, targetPieceCode);
     }
     return false;   
+}
+
+function canRookMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode) {
+        return false;
+    }
+
+    const rowDiff = Math.abs(targetRow - sourceRow);
+    const colDiff = Math.abs(targetCol - sourceCol);
+
+    // Rook moves in straight lines: either the row or the column must be the same.
+    if (rowDiff === 0 || colDiff === 0) {
+        // Check if the path is clear (no pieces in between).
+        const rowStep = targetRow > sourceRow ? 1 : (targetRow < sourceRow ? -1 : 0);
+        const colStep = targetCol > sourceCol ? 1 : (targetCol < sourceCol ? -1 : 0);
+
+        let currentRow = sourceRow + rowStep;
+        let currentCol = sourceCol + colStep;
+
+        while (currentRow !== targetRow || currentCol !== targetCol) {
+            if (boardState[currentRow] && boardState[currentRow][currentCol]) {
+                return false;
+            }
+            currentRow += rowStep;
+            currentCol += colStep;
+        }
+
+        return canMoveTo(pieceCode, targetPieceCode);
+    }
+
+    return false;
 }
