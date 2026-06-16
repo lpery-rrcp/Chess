@@ -168,3 +168,17 @@ function canQueenMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceC
         canBishopMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol)
     );
 }   
+
+function canKingMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode) {
+        return false;
+    }
+
+    const rowDiff = Math.abs(targetRow - sourceRow);
+    const colDiff = Math.abs(targetCol - sourceCol);
+    // King moves one square in any direction.
+    if (rowDiff <= 1 && colDiff <= 1) {
+        return canMoveTo(pieceCode, targetPieceCode);
+    }
+    return false;
+}
