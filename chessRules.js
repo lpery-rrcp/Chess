@@ -182,3 +182,4 @@ function canKingMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow
     }
     return false;
 }
+

@@ -1,4 +1,5 @@
 const boardElement = document.getElementById("chess-board");
+const turnIndicator = document.getElementById("turn-indicator");
 
 const pieceNames = {
   r: "Rook",
@@ -22,6 +23,7 @@ const initialBoard = [
 
 let boardState = initialBoard.map((row) => [...row]);
 let draggedPiece = null;
+let currentTurn = "white";
 
 renderBoard();
 
@@ -30,6 +32,16 @@ boardElement.addEventListener("dragover", handleDragOver);
 boardElement.addEventListener("dragleave", handleDragLeave);
 boardElement.addEventListener("drop", handleDrop);
 boardElement.addEventListener("dragend", clearHighlight);
+
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+function updateTurnIndicator() {
+  if (turnIndicator) {
+    turnIndicator.textContent = `${capitalize(currentTurn)} to move`;
+  }
+}
 
 function renderBoard() {
   boardElement.innerHTML = "";
@@ -67,6 +79,8 @@ function renderBoard() {
       boardElement.appendChild(square);
     }
   }
+
+  updateTurnIndicator();
 }
 
 function createPiece(pieceCode) {
@@ -97,7 +111,21 @@ function handleDragStart(event) {
     return;
   }
 
-  draggedPiece = piece.parentElement;
+  const square = piece.parentElement;
+  if (!square) {
+    return;
+  }
+
+  const sourceRow = Number(square.dataset.row);
+  const sourceCol = Number(square.dataset.col);
+  const pieceCode = boardState[sourceRow]?.[sourceCol];
+
+  if (!pieceCode || getPieceColor(pieceCode) !== currentTurn) {
+    event.preventDefault();
+    return;
+  }
+
+  draggedPiece = square;
   event.dataTransfer.setData("text/plain", draggedPiece.id);
   piece.classList.add("dragging");
 }
@@ -139,6 +167,11 @@ function handleDrop(event) {
   const movedPiece = boardState[sourceRow][sourceCol];
   const targetPiece = boardState[targetRow][targetCol];
 
+  if (!movedPiece || getPieceColor(movedPiece) !== currentTurn) {
+    clearHighlight();
+    return;
+  }
+
   const pieceType = movedPiece ? movedPiece[1].toLowerCase() : "";
 
   // Use piece-specific rules for pawns, knights, and bishops, and the basic rule for all other pieces.
@@ -164,6 +197,8 @@ function handleDrop(event) {
 
   boardState[targetRow][targetCol] = movedPiece;
   boardState[sourceRow][sourceCol] = "";
+
+  currentTurn = currentTurn === "white" ? "black" : "white";
 
   clearHighlight();
   renderBoard();
