@@ -186,7 +186,7 @@ function handleDrop(event) {
     : pieceType === "q"
       ? canQueenMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
     : pieceType === "k"
-      ? canKingMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol)
+      ? canKingMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol, boardState)
         : canMoveTo(movedPiece, targetPiece);
       
 
@@ -197,6 +197,17 @@ function handleDrop(event) {
 
   boardState[targetRow][targetCol] = movedPiece;
   boardState[sourceRow][sourceCol] = "";
+
+  if (pieceType === "k" && Math.abs(targetCol - sourceCol) === 2) {
+    const rookFromCol = targetCol > sourceCol ? 7 : 0;
+    const rookToCol = targetCol > sourceCol ? targetCol - 1 : targetCol + 1;
+    const rookPiece = boardState[sourceRow][rookFromCol];
+
+    if (rookPiece) {
+      boardState[sourceRow][rookToCol] = rookPiece;
+      boardState[sourceRow][rookFromCol] = "";
+    }
+  }
 
   currentTurn = currentTurn === "white" ? "black" : "white";
 

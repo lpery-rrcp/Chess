@@ -169,17 +169,155 @@ function canQueenMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceC
     );
 }   
 
-function canKingMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow, targetCol) {
+function isSquareAttacked(boardState, row, col, attackerColor) {
+    if (row < 0 || row > 7 || col < 0 || col > 7) {
+        return false;
+    }
+
+    const pieceCode = `${attackerColor[0]}`;
+
+    const knightMoves = [
+        [2, 1], [2, -1], [-2, 1], [-2, -1],
+        [1, 2], [1, -2], [-1, 2], [-1, -2]
+    ];
+
+    for (const [dr, dc] of knightMoves) {
+        const newRow = row + dr;
+        const newCol = col + dc;
+        if (
+            newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7 &&
+            boardState[newRow]?.[newCol] === `${attackerColor === "white" ? "w" : "b"}N`
+        ) {
+            return true;
+        }
+    }
+
+    const kingMoves = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1], [0, 1],
+        [1, -1], [1, 0], [1, 1]
+    ];
+
+    for (const [dr, dc] of kingMoves) {
+        const newRow = row + dr;
+        const newCol = col + dc;
+        if (
+            newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7 &&
+            boardState[newRow]?.[newCol] === `${attackerColor === "white" ? "w" : "b"}K`
+        ) {
+            return true;
+        }
+    }
+
+    const pawnDirection = attackerColor === "white" ? 1 : -1;
+    const pawnRow = row + pawnDirection;
+    for (const pawnCol of [col - 1, col + 1]) {
+        if (
+            pawnRow >= 0 && pawnRow <= 7 &&
+            pawnCol >= 0 && pawnCol <= 7 &&
+            boardState[pawnRow]?.[pawnCol] === `${attackerColor === "white" ? "w" : "b"}P`
+        ) {
+            return true;
+        }
+    }
+
+    const slidingDirections = [
+        [-1, 0], [1, 0], [0, -1], [0, 1],
+        [-1, -1], [-1, 1], [1, -1], [1, 1]
+    ];
+
+    for (const [dr, dc] of slidingDirections) {
+        let currentRow = row + dr;
+        let currentCol = col + dc;
+
+        while (currentRow >= 0 && currentRow <= 7 && currentCol >= 0 && currentCol <= 7) {
+            const piece = boardState[currentRow]?.[currentCol];
+            if (piece) {
+                const pieceColor = getPieceColor(piece);
+                const pieceType = piece[1]?.toLowerCase();
+                if (pieceColor === attackerColor) {
+                    if (
+                        ((Math.abs(dr) === 1 && Math.abs(dc) === 1) && (pieceType === "b" || pieceType === "q")) ||
+                        ((dr === 0 || dc === 0) && (pieceType === "r" || pieceType === "q"))
+                    ) {
+                        return true;
+                    }
+                    break;
+                }
+                break;
+            }
+            currentRow += dr;
+            currentCol += dc;
+        }
+    }
+
+    return false;
+}
+
+function canCastleMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode || pieceCode[1].toLowerCase() !== "k") {
+        return false;
+    }
+
+    const color = getPieceColor(pieceCode);
+    const rowDiff = targetRow - sourceRow;
+    const colDiff = targetCol - sourceCol;
+
+    if (rowDiff !== 0 || Math.abs(colDiff) !== 2) {
+        return false;
+    }
+
+    if (!targetPieceCode) {
+        const rookCol = colDiff > 0 ? 7 : 0;
+        const rookPiece = boardState[sourceRow][rookCol];
+        if (!rookPiece || rookPiece[1].toLowerCase() !== "r") {
+            return false;
+        }
+
+        const pathCols = colDiff > 0
+            ? [sourceCol + 1, sourceCol + 2]
+            : [sourceCol - 1, sourceCol - 2];
+
+        for (const pathCol of pathCols) {
+            if (boardState[sourceRow][pathCol]) {
+                return false;
+            }
+        }
+
+        const kingSide = colDiff > 0;
+        const squaresToCheck = kingSide
+            ? [sourceCol, sourceCol + 1, sourceCol + 2]
+            : [sourceCol, sourceCol - 1, sourceCol - 2];
+        const opponentColor = color === "white" ? "black" : "white";
+
+        for (const pathCol of squaresToCheck) {
+            if (isSquareAttacked(boardState, sourceRow, pathCol, opponentColor)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+function canKingMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow, targetCol, boardState) {
     if (!pieceCode) {
         return false;
     }
 
     const rowDiff = Math.abs(targetRow - sourceRow);
     const colDiff = Math.abs(targetCol - sourceCol);
-    // King moves one square in any direction.
+
     if (rowDiff <= 1 && colDiff <= 1) {
         return canMoveTo(pieceCode, targetPieceCode);
     }
+
+    if (boardState && canCastleMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol)) {
+        return true;
+    }
+
     return false;
 }
 

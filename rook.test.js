@@ -32,4 +32,28 @@ assert.strictEqual(
   'A rook should be blocked by a piece on its path.'
 );
 
+const castlingBoard = [
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['wR', '', '', '', 'wK', '', '', 'wR']
+];
+
+assert.strictEqual(
+  context.canKingMove('wK', null, 7, 4, 7, 6, castlingBoard),
+  true,
+  'A king should be allowed to castle kingside when the path is clear.'
+);
+
+castlingBoard[7][5] = 'bP';
+assert.strictEqual(
+  context.canKingMove('wK', null, 7, 4, 7, 6, castlingBoard),
+  false,
+  'A king should not be able to castle through an attacked square.'
+);
+
 console.log('Rook move tests passed.');
