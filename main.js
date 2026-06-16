@@ -150,6 +150,8 @@ function handleDrop(event) {
       ? canBishopMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
     : pieceType === "r"
       ? canRookMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+    : pieceType === "q"
+      ? canQueenMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
         : canMoveTo(movedPiece, targetPiece);
       
 

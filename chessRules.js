@@ -156,3 +156,15 @@ function canRookMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCo
 
     return false;
 }
+
+// function canQueenMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
+//     if (!pieceCode) {
+//         return false;
+//     }
+
+//     // Queen moves like a rook or a bishop.
+//     return (
+//         canRookMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) ||
+//         canBishopMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol)
+//     );
+// }   
