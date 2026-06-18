@@ -12,7 +12,23 @@
       <p id="turn-indicator" class="turn-indicator">White to move</p>
       <div class="board-actions">
         <button id="swap-mode-button" class="swap-button" type="button">Swap Pieces</button>
+        <button id="setup-mode-button" class="swap-button" type="button">Custom Setup</button>
         <span id="swap-help" class="swap-help">Choose two rook, bishop, or knight pieces to swap.</span>
+      </div>
+      <div id="setup-controls" class="setup-controls" hidden>
+        <div class="setup-side-picker">
+          <button class="setup-side-button active" data-setup-side="white" type="button">White</button>
+          <button class="setup-side-button" data-setup-side="black" type="button">Black</button>
+        </div>
+        <div class="setup-piece-picker">
+          <button class="setup-piece-button active" data-setup-piece="r" type="button">Rook</button>
+          <button class="setup-piece-button" data-setup-piece="n" type="button">Knight</button>
+          <button class="setup-piece-button" data-setup-piece="b" type="button">Bishop</button>
+          <button class="setup-piece-button" data-setup-piece="q" type="button">Queen</button>
+          <button class="setup-piece-button" data-setup-piece="k" type="button">King</button>
+          <button class="setup-piece-button" data-setup-piece="p" type="button">Pawn</button>
+          <button class="setup-piece-button" data-setup-piece="clear" type="button">Clear</button>
+        </div>
       </div>
       <div id="chess-board" class="chessBoard" aria-label="Chess board"></div>
     </main>

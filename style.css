@@ -61,6 +61,37 @@ body {
   font-size: 0.9rem;
 }
 
+.setup-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.setup-side-picker,
+.setup-piece-picker {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.setup-side-button,
+.setup-piece-button {
+  border: none;
+  background: #334155;
+  color: #e2e8f0;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.setup-side-button.active,
+.setup-piece-button.active {
+  background: #22c55e;
+  color: #0f172a;
+}
+
 .chessBoard {
   width: min(92vw, 640px);
   aspect-ratio: 1 / 1;

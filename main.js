@@ -1,6 +1,8 @@
 const boardElement = document.getElementById("chess-board");
 const turnIndicator = document.getElementById("turn-indicator");
 const swapButton = document.getElementById("swap-mode-button");
+const setupButton = document.getElementById("setup-mode-button");
+const setupControls = document.getElementById("setup-controls");
 
 const pieceNames = {
   r: "Rook",
@@ -26,12 +28,23 @@ let boardState = initialBoard.map((row) => [...row]);
 let draggedPiece = null;
 let currentTurn = "white";
 let isSwapMode = false;
+let isSetupMode = false;
 let selectedSwapPiece = null;
+let selectedSetupSide = "white";
+let selectedSetupPiece = "r";
 
 renderBoard();
 
 if (swapButton) {
   swapButton.addEventListener("click", toggleSwapMode);
+}
+
+if (setupButton) {
+  setupButton.addEventListener("click", toggleSetupMode);
+}
+
+if (setupControls) {
+  setupControls.addEventListener("click", handleSetupControlsClick);
 }
 
 boardElement.addEventListener("dragstart", handleDragStart);
@@ -58,6 +71,24 @@ function updateSwapButton() {
 
   swapButton.textContent = isSwapMode ? "Cancel Swap" : "Swap Pieces";
   swapButton.classList.toggle("active", isSwapMode);
+}
+
+function updateSetupControls() {
+  if (!setupControls || !setupButton) {
+    return;
+  }
+
+  setupControls.hidden = !isSetupMode;
+  setupButton.textContent = isSetupMode ? "Done Setup" : "Custom Setup";
+  setupButton.classList.toggle("active", isSetupMode);
+
+  document.querySelectorAll(".setup-side-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.setupSide === selectedSetupSide);
+  });
+
+  document.querySelectorAll(".setup-piece-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.setupPiece === selectedSetupPiece);
+  });
 }
 
 function renderBoard() {
@@ -108,6 +139,7 @@ function renderBoard() {
 
   updateTurnIndicator();
   updateSwapButton();
+  updateSetupControls();
 }
 
 function createPiece(pieceCode) {
@@ -133,12 +165,59 @@ function createPiece(pieceCode) {
 
 function toggleSwapMode() {
   isSwapMode = !isSwapMode;
+  if (isSwapMode) {
+    isSetupMode = false;
+  }
   selectedSwapPiece = null;
   updateSwapButton();
   renderBoard();
 }
 
+function toggleSetupMode() {
+  isSetupMode = !isSetupMode;
+  if (isSetupMode) {
+    isSwapMode = false;
+  }
+  renderBoard();
+}
+
+function handleSetupControlsClick(event) {
+  const sideButton = event.target.closest("[data-setup-side]");
+  if (sideButton) {
+    selectedSetupSide = sideButton.dataset.setupSide;
+    renderBoard();
+    return;
+  }
+
+  const pieceButton = event.target.closest("[data-setup-piece]");
+  if (pieceButton) {
+    selectedSetupPiece = pieceButton.dataset.setupPiece;
+    renderBoard();
+  }
+}
+
+function handleSetupPlacement(row, col) {
+  const pieceCode = selectedSetupPiece === "clear"
+    ? ""
+    : `${selectedSetupSide[0]}${selectedSetupPiece.toUpperCase()}`;
+
+  boardState[row][col] = pieceCode;
+  renderBoard();
+}
+
 function handleBoardClick(event) {
+  if (isSetupMode) {
+    const square = event.target.closest(".square");
+    if (!square) {
+      return;
+    }
+
+    const row = Number(square.dataset.row);
+    const col = Number(square.dataset.col);
+    handleSetupPlacement(row, col);
+    return;
+  }
+
   if (!isSwapMode) {
     return;
   }
@@ -170,7 +249,7 @@ function handleBoardClick(event) {
   const selectedCol = selectedSwapPiece.col;
   const selectedPiece = boardState[selectedRow]?.[selectedCol];
 
-  if (!selectedPiece || selectedRow === row && selectedCol === col) {
+  if (!selectedPiece || (selectedRow === row && selectedCol === col)) {
     selectedSwapPiece = null;
     renderBoard();
     return;
@@ -193,7 +272,7 @@ function handleBoardClick(event) {
 function handleDragStart(event) {
   const piece = event.target.closest(".piece");
 
-  if (!piece) {
+  if (!piece || isSetupMode || isSwapMode) {
     return;
   }
 
@@ -217,6 +296,10 @@ function handleDragStart(event) {
 }
 
 function handleDragOver(event) {
+  if (isSetupMode || isSwapMode) {
+    return;
+  }
+
   event.preventDefault();
 
   const square = event.target.closest(".square");
@@ -233,6 +316,10 @@ function handleDragLeave(event) {
 }
 
 function handleDrop(event) {
+  if (isSetupMode || isSwapMode) {
+    return;
+  }
+
   event.preventDefault();
 
   const targetSquare = event.target.closest(".square");
