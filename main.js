@@ -33,6 +33,15 @@ let selectedSwapPiece = null;
 let selectedSetupSide = "white";
 let selectedSetupPiece = "r";
 
+function isProtectedPieceCode(pieceCode) {
+  if (!pieceCode) {
+    return false;
+  }
+
+  const pieceType = pieceCode[1]?.toLowerCase();
+  return pieceType === "q" || pieceType === "k" || pieceType === "p";
+}
+
 renderBoard();
 
 if (swapButton) {
@@ -197,6 +206,17 @@ function handleSetupControlsClick(event) {
 }
 
 function handleSetupPlacement(row, col) {
+  const currentPiece = boardState[row]?.[col];
+
+  if (
+    isProtectedPieceCode(currentPiece) ||
+    selectedSetupPiece === "q" ||
+    selectedSetupPiece === "k" ||
+    selectedSetupPiece === "p"
+  ) {
+    return;
+  }
+
   const pieceCode = selectedSetupPiece === "clear"
     ? ""
     : `${selectedSetupSide[0]}${selectedSetupPiece.toUpperCase()}`;
