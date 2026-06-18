@@ -42,6 +42,11 @@ function isProtectedPieceCode(pieceCode) {
   return pieceType === "q" || pieceType === "k" || pieceType === "p";
 }
 
+function isProtectedSetupPlacement(row, col) {
+  const currentPiece = boardState[row]?.[col];
+  return isProtectedPieceCode(currentPiece);
+}
+
 renderBoard();
 
 if (swapButton) {
@@ -138,6 +143,10 @@ function renderBoard() {
         square.classList.add("selected-swap");
       }
 
+      if (isSetupMode && isProtectedSetupPlacement(row, col)) {
+        square.classList.add("locked");
+      }
+
       if (pieceCode) {
         square.appendChild(createPiece(pieceCode));
       }
@@ -206,14 +215,7 @@ function handleSetupControlsClick(event) {
 }
 
 function handleSetupPlacement(row, col) {
-  const currentPiece = boardState[row]?.[col];
-
-  if (
-    isProtectedPieceCode(currentPiece) ||
-    selectedSetupPiece === "q" ||
-    selectedSetupPiece === "k" ||
-    selectedSetupPiece === "p"
-  ) {
+  if (isProtectedSetupPlacement(row, col)) {
     return;
   }
 
