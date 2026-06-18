@@ -56,4 +56,28 @@ assert.strictEqual(
   'A king should not be able to castle through an attacked square.'
 );
 
+assert.strictEqual(
+  context.canSwapPieces('wR', 'bB'),
+  true,
+  'A rook and bishop should be allowed to swap.'
+);
+
+assert.strictEqual(
+  context.canSwapPieces('wK', 'bB'),
+  false,
+  'A king should not be allowed to swap.'
+);
+
+assert.strictEqual(
+  context.canSwapPieces('wQ', 'bN'),
+  false,
+  'A queen should not be allowed to swap.'
+);
+
+assert.strictEqual(
+  context.canSwapPieces('wP', 'bR'),
+  false,
+  'A pawn should not be allowed to swap.'
+);
+
 console.log('Rook move tests passed.');

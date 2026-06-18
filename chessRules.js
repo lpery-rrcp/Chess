@@ -16,6 +16,22 @@ function isSameColor(pieceCode, otherPieceCode) {
   return getPieceColor(pieceCode) === getPieceColor(otherPieceCode);
 }
 
+function isSwapEligible(pieceCode) {
+  if (!pieceCode) {
+    return false;
+  }
+
+  const pieceType = pieceCode[1]?.toLowerCase();
+  return pieceType === "r" || pieceType === "b" || pieceType === "n";
+}
+
+function canSwapPieces(pieceCodeA, pieceCodeB) {
+  return (
+    isSwapEligible(pieceCodeA) &&
+    isSwapEligible(pieceCodeB)
+  );
+}
+
 // Basic move validation: a piece can move to an empty square or capture an opponent's piece
 function canMoveTo(pieceCode, targetPieceCode) {
     // 

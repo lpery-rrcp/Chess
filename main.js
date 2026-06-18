@@ -1,5 +1,6 @@
 const boardElement = document.getElementById("chess-board");
 const turnIndicator = document.getElementById("turn-indicator");
+const swapButton = document.getElementById("swap-mode-button");
 
 const pieceNames = {
   r: "Rook",
@@ -24,14 +25,21 @@ const initialBoard = [
 let boardState = initialBoard.map((row) => [...row]);
 let draggedPiece = null;
 let currentTurn = "white";
+let isSwapMode = false;
+let selectedSwapPiece = null;
 
 renderBoard();
+
+if (swapButton) {
+  swapButton.addEventListener("click", toggleSwapMode);
+}
 
 boardElement.addEventListener("dragstart", handleDragStart);
 boardElement.addEventListener("dragover", handleDragOver);
 boardElement.addEventListener("dragleave", handleDragLeave);
 boardElement.addEventListener("drop", handleDrop);
 boardElement.addEventListener("dragend", clearHighlight);
+boardElement.addEventListener("click", handleBoardClick);
 
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
@@ -41,6 +49,15 @@ function updateTurnIndicator() {
   if (turnIndicator) {
     turnIndicator.textContent = `${capitalize(currentTurn)} to move`;
   }
+}
+
+function updateSwapButton() {
+  if (!swapButton) {
+    return;
+  }
+
+  swapButton.textContent = isSwapMode ? "Cancel Swap" : "Swap Pieces";
+  swapButton.classList.toggle("active", isSwapMode);
 }
 
 function renderBoard() {
@@ -72,6 +89,15 @@ function renderBoard() {
       }
 
       const pieceCode = boardState[row][col];
+      const isSelectedSwapSquare =
+        selectedSwapPiece &&
+        selectedSwapPiece.row === row &&
+        selectedSwapPiece.col === col;
+
+      if (isSelectedSwapSquare) {
+        square.classList.add("selected-swap");
+      }
+
       if (pieceCode) {
         square.appendChild(createPiece(pieceCode));
       }
@@ -81,6 +107,7 @@ function renderBoard() {
   }
 
   updateTurnIndicator();
+  updateSwapButton();
 }
 
 function createPiece(pieceCode) {
@@ -102,6 +129,65 @@ function createPiece(pieceCode) {
 
   piece.appendChild(image);
   return piece;
+}
+
+function toggleSwapMode() {
+  isSwapMode = !isSwapMode;
+  selectedSwapPiece = null;
+  updateSwapButton();
+  renderBoard();
+}
+
+function handleBoardClick(event) {
+  if (!isSwapMode) {
+    return;
+  }
+
+  const square = event.target.closest(".square");
+  if (!square) {
+    return;
+  }
+
+  const row = Number(square.dataset.row);
+  const col = Number(square.dataset.col);
+  const clickedPiece = boardState[row]?.[col];
+
+  if (!clickedPiece || getPieceColor(clickedPiece) !== currentTurn) {
+    return;
+  }
+
+  if (!isSwapEligible(clickedPiece)) {
+    return;
+  }
+
+  if (!selectedSwapPiece) {
+    selectedSwapPiece = { row, col };
+    renderBoard();
+    return;
+  }
+
+  const selectedRow = selectedSwapPiece.row;
+  const selectedCol = selectedSwapPiece.col;
+  const selectedPiece = boardState[selectedRow]?.[selectedCol];
+
+  if (!selectedPiece || selectedRow === row && selectedCol === col) {
+    selectedSwapPiece = null;
+    renderBoard();
+    return;
+  }
+
+  if (!canSwapPieces(selectedPiece, clickedPiece)) {
+    selectedSwapPiece = null;
+    renderBoard();
+    return;
+  }
+
+  boardState[selectedRow][selectedCol] = clickedPiece;
+  boardState[row][col] = selectedPiece;
+  selectedSwapPiece = null;
+  isSwapMode = false;
+  updateSwapButton();
+  renderBoard();
 }
 
 function handleDragStart(event) {

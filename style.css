@@ -33,6 +33,34 @@ body {
   text-align: center;
 }
 
+.board-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.swap-button {
+  border: none;
+  background: #e2e8f0;
+  color: #0f172a;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.swap-button.active {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.swap-help {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
 .chessBoard {
   width: min(92vw, 640px);
   aspect-ratio: 1 / 1;
@@ -63,6 +91,11 @@ body {
 
 .square.hover {
   outline: 3px solid #f59e0b;
+  outline-offset: -3px;
+}
+
+.square.selected-swap {
+  outline: 3px solid #22c55e;
   outline-offset: -3px;
 }
 
