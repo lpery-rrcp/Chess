@@ -315,6 +315,9 @@ function handleDragStart(event) {
   draggedPiece = square;
   event.dataTransfer.setData("text/plain", draggedPiece.id);
   piece.classList.add("dragging");
+  const srcRow = Number(square.dataset.row);
+  const srcCol = Number(square.dataset.col);
+  highlightLegalMoves(srcRow, srcCol);
 }
 
 function handleDragOver(event) {
@@ -419,5 +422,61 @@ function clearHighlight() {
     piece.classList.remove("dragging");
   });
 
+  // remove move / capture highlights
+  document.querySelectorAll(".square.move-target").forEach((sq) => {
+    sq.classList.remove("move-target");
+  });
+
+  document.querySelectorAll(".piece.captureable").forEach((pc) => {
+    pc.classList.remove("captureable");
+  });
+
   draggedPiece = null;
+}
+
+// Highlight squares the piece at sourceRow,sourceCol can move to.
+function highlightLegalMoves(sourceRow, sourceCol) {
+  // Clear any existing highlights first
+  document.querySelectorAll(".square.move-target").forEach((sq) => sq.classList.remove("move-target"));
+  document.querySelectorAll(".piece.captureable").forEach((pc) => pc.classList.remove("captureable"));
+
+  const pieceCode = boardState[sourceRow]?.[sourceCol];
+  if (!pieceCode) return;
+
+  const pieceType = pieceCode[1]?.toLowerCase();
+
+  for (let tr = 0; tr < 8; tr += 1) {
+    for (let tc = 0; tc < 8; tc += 1) {
+      if (tr === sourceRow && tc === sourceCol) continue;
+
+      const targetPiece = boardState[tr][tc];
+
+      const isAllowed = pieceType === "p"
+        ? canPawnMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
+        : pieceType === "n"
+          ? canKnightMove(pieceCode, targetPiece, sourceRow, sourceCol, tr, tc)
+          : pieceType === "b"
+            ? canBishopMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
+            : pieceType === "r"
+              ? canRookMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
+              : pieceType === "q"
+                ? canQueenMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
+                : pieceType === "k"
+                  ? canKingMove(pieceCode, targetPiece, sourceRow, sourceCol, tr, tc, boardState)
+                  : canMoveTo(pieceCode, targetPiece);
+
+      if (isAllowed) {
+        const file = String.fromCharCode(97 + tc);
+        const rank = 8 - tr;
+        const squareEl = document.getElementById(`${file}${rank}`);
+        if (squareEl) {
+          squareEl.classList.add("move-target");
+          if (targetPiece && getPieceColor(targetPiece) !== getPieceColor(pieceCode)) {
+            const pieceEl = squareEl.querySelector(".piece");
+            if (pieceEl) pieceEl.classList.add("captureable");
+          }
+        }
+      }
+    }
+  }
 }

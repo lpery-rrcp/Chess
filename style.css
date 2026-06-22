@@ -125,6 +125,18 @@ body {
   outline-offset: -3px;
 }
 
+/* Highlight valid move targets while dragging a piece */
+.square.move-target {
+  outline: 3px solid rgba(34, 197, 94, 0.95);
+  outline-offset: -3px;
+}
+
+/* Outline pieces that can be captured */
+.piece.captureable {
+  outline: 3px solid rgba(239, 68, 68, 0.95);
+  outline-offset: -3px;
+}
+
 .square.selected-swap {
   outline: 3px solid #22c55e;
   outline-offset: -3px;
