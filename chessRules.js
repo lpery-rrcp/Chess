@@ -115,6 +115,33 @@ function canKnightMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetR
     return false;
 }
 
+function canWizardMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
+    if (!pieceCode) {
+        return false;
+    }
+
+    if (sourceRow === targetRow && sourceCol === targetCol) {
+        return false;
+    }
+
+    const color = getPieceColor(pieceCode);
+    const direction = color === "white" ? -1 : 1;
+    const rowDiff = targetRow - sourceRow;
+    const colDiff = targetCol - sourceCol;
+
+    // Wizard can swap places with any same-color piece anywhere on the board.
+    if (targetPieceCode && isSameColor(pieceCode, targetPieceCode)) {
+        return true;
+    }
+
+    // Wizard moves exactly 2 spaces forward and can jump over pieces.
+    if (colDiff === 0 && rowDiff === 2 * direction) {
+        return canMoveTo(pieceCode, targetPieceCode);
+    }
+
+    return false;
+}
+
 function canBishopMove(pieceCode, targetPieceCode, boardState, sourceRow, sourceCol, targetRow, targetCol) {
     if (!pieceCode) {
         return false;

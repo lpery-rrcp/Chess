@@ -10,7 +10,8 @@ const pieceNames = {
   b: "Bishop",
   q: "Queen",
   k: "King",
-  p: "Pawn"
+  p: "Pawn",
+  z: "Wizard"
 };
 
 const initialBoard = [
@@ -385,6 +386,8 @@ function handleDrop(event) {
       ? canQueenMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
     : pieceType === "k"
       ? canKingMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol, boardState)
+    : pieceType === "z"
+      ? canWizardMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
         : canMoveTo(movedPiece, targetPiece);
       
 
@@ -463,7 +466,9 @@ function highlightLegalMoves(sourceRow, sourceCol) {
                 ? canQueenMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
                 : pieceType === "k"
                   ? canKingMove(pieceCode, targetPiece, sourceRow, sourceCol, tr, tc, boardState)
-                  : canMoveTo(pieceCode, targetPiece);
+                  : pieceType === "z"
+                    ? canWizardMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
+                    : canMoveTo(pieceCode, targetPiece);
 
       if (isAllowed) {
         const file = String.fromCharCode(97 + tc);
