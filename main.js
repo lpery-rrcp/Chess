@@ -33,6 +33,9 @@ let isSetupMode = false;
 let selectedSwapPiece = null;
 let selectedSetupSide = "white";
 let selectedSetupPiece = "r";
+let selectedSwapSide = "white";
+let selectedSwapFrom = "r";
+let selectedSwapTo = "z";
 
 function isProtectedPieceCode(pieceCode) {
   if (!pieceCode) {
@@ -62,6 +65,17 @@ if (setupControls) {
   setupControls.addEventListener("click", handleSetupControlsClick);
 }
 
+const swapControls = document.getElementById("bulk-swap-controls");
+const swapAllButton = document.getElementById("swap-all-button");
+
+if (swapControls) {
+  swapControls.addEventListener("click", handleSwapControlsClick);
+}
+
+if (swapAllButton) {
+  swapAllButton.addEventListener("click", performSwapAll);
+}
+
 boardElement.addEventListener("dragstart", handleDragStart);
 boardElement.addEventListener("dragover", handleDragOver);
 boardElement.addEventListener("dragleave", handleDragLeave);
@@ -88,6 +102,26 @@ function updateSwapButton() {
   swapButton.classList.toggle("active", isSwapMode);
 }
 
+function updateSwapControls() {
+  if (!swapControls) {
+    return;
+  }
+
+  swapControls.hidden = !isSwapMode;
+  swapControls.querySelectorAll(".swap-side-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.swapSide === selectedSwapSide);
+  });
+
+  swapControls.querySelectorAll(".swap-piece-button").forEach((button) => {
+    if (button.dataset.swapFrom) {
+      button.classList.toggle("active", button.dataset.swapFrom === selectedSwapFrom);
+    }
+    if (button.dataset.swapTo) {
+      button.classList.toggle("active", button.dataset.swapTo === selectedSwapTo);
+    }
+  });
+}
+
 function updateSetupControls() {
   if (!setupControls || !setupButton) {
     return;
@@ -97,11 +131,11 @@ function updateSetupControls() {
   setupButton.textContent = isSetupMode ? "Done Setup" : "Custom Setup";
   setupButton.classList.toggle("active", isSetupMode);
 
-  document.querySelectorAll(".setup-side-button").forEach((button) => {
+  setupControls.querySelectorAll(".setup-side-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.setupSide === selectedSetupSide);
   });
 
-  document.querySelectorAll(".setup-piece-button").forEach((button) => {
+  setupControls.querySelectorAll(".setup-piece-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.setupPiece === selectedSetupPiece);
   });
 }
@@ -158,6 +192,7 @@ function renderBoard() {
 
   updateTurnIndicator();
   updateSwapButton();
+  updateSwapControls();
   updateSetupControls();
 }
 
@@ -200,6 +235,29 @@ function toggleSetupMode() {
   renderBoard();
 }
 
+function handleSwapControlsClick(event) {
+  const sideButton = event.target.closest("[data-swap-side]");
+  if (sideButton) {
+    selectedSwapSide = sideButton.dataset.swapSide;
+    renderBoard();
+    return;
+  }
+
+  const fromButton = event.target.closest("[data-swap-from]");
+  if (fromButton) {
+    selectedSwapFrom = fromButton.dataset.swapFrom;
+    renderBoard();
+    return;
+  }
+
+  const toButton = event.target.closest("[data-swap-to]");
+  if (toButton) {
+    selectedSwapTo = toButton.dataset.swapTo;
+    renderBoard();
+    return;
+  }
+}
+
 function handleSetupControlsClick(event) {
   const sideButton = event.target.closest("[data-setup-side]");
   if (sideButton) {
@@ -225,6 +283,32 @@ function handleSetupPlacement(row, col) {
     : `${selectedSetupSide[0]}${selectedSetupPiece.toUpperCase()}`;
 
   boardState[row][col] = pieceCode;
+  renderBoard();
+}
+
+function performSwapAll() {
+  if (selectedSwapFrom === selectedSwapTo) {
+    return;
+  }
+
+  const fromCode = selectedSwapFrom.toLowerCase();
+  const toCode = selectedSwapTo.toLowerCase();
+  const sidePrefix = selectedSwapSide[0];
+
+  for (let row = 0; row < boardState.length; row += 1) {
+    for (let col = 0; col < boardState[row].length; col += 1) {
+      const pieceCode = boardState[row][col];
+      if (!pieceCode || pieceCode[0] !== sidePrefix) {
+        continue;
+      }
+      const pieceType = pieceCode[1]?.toLowerCase();
+      if (pieceType === fromCode) {
+        boardState[row][col] = `${sidePrefix}${toCode.toUpperCase()}`;
+      }
+    }
+  }
+
+  selectedSwapPiece = null;
   renderBoard();
 }
 

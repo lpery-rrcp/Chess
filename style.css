@@ -61,7 +61,8 @@ body {
   font-size: 0.9rem;
 }
 
-.setup-controls {
+.setup-controls,
+.swap-controls {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,15 +70,29 @@ body {
 }
 
 .setup-side-picker,
-.setup-piece-picker {
+.setup-piece-picker,
+.swap-side-picker,
+.swap-piece-picker {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
   justify-content: center;
 }
 
+.swap-controls {
+  width: 100%;
+  max-width: 700px;
+  padding: 0.5rem 0;
+}
+
+#swap-all-button {
+  min-width: 160px;
+}
+
 .setup-side-button,
-.setup-piece-button {
+.setup-piece-button,
+.swap-side-button,
+.swap-piece-button {
   border: none;
   background: #334155;
   color: #e2e8f0;
@@ -87,7 +102,9 @@ body {
 }
 
 .setup-side-button.active,
-.setup-piece-button.active {
+.setup-piece-button.active,
+.swap-side-button.active,
+.swap-piece-button.active {
   background: #22c55e;
   color: #0f172a;
 }

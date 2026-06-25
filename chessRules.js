@@ -22,7 +22,7 @@ function isSwapEligible(pieceCode) {
   }
 
   const pieceType = pieceCode[1]?.toLowerCase();
-  return pieceType === "r" || pieceType === "b" || pieceType === "n";
+  return ["r", "b", "n", "z"].includes(pieceType);
 }
 
 function canSwapPieces(pieceCodeA, pieceCodeB) {
