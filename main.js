@@ -37,6 +37,9 @@ let selectedSwapSide = "white";
 let selectedSwapFrom = "r";
 let selectedSwapTo = "z";
 
+const swapControls = document.getElementById("bulk-swap-controls");
+const swapAllButton = document.getElementById("swap-all-button");
+
 function isProtectedPieceCode(pieceCode) {
   if (!pieceCode) {
     return false;
@@ -51,8 +54,6 @@ function isProtectedSetupPlacement(row, col) {
   return isProtectedPieceCode(currentPiece);
 }
 
-renderBoard();
-
 if (swapButton) {
   swapButton.addEventListener("click", toggleSwapMode);
 }
@@ -65,9 +66,6 @@ if (setupControls) {
   setupControls.addEventListener("click", handleSetupControlsClick);
 }
 
-const swapControls = document.getElementById("bulk-swap-controls");
-const swapAllButton = document.getElementById("swap-all-button");
-
 if (swapControls) {
   swapControls.addEventListener("click", handleSwapControlsClick);
 }
@@ -75,6 +73,8 @@ if (swapControls) {
 if (swapAllButton) {
   swapAllButton.addEventListener("click", performSwapAll);
 }
+
+renderBoard();
 
 boardElement.addEventListener("dragstart", handleDragStart);
 boardElement.addEventListener("dragover", handleDragOver);
