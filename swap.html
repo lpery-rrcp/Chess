@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess Board Setup</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page-mode="swap">
+    <main class="app-shell">
+      <h1 class="app-title">Prepare the Board</h1>
+      <p id="turn-indicator" class="turn-indicator">Choose a side and swap pieces before starting</p>
+      <div class="board-actions">
+        <button id="swap-mode-button" class="swap-button" type="button">Swap Pieces</button>
+        <button id="start-game-button" class="swap-button" type="button">Start Game</button>
+      </div>
+      <p id="swap-help" class="swap-help">Choose a side first, then use the swap controls to replace matching pieces before the game begins.</p>
+      <div id="bulk-swap-controls" class="swap-controls">
+        <div class="swap-side-picker">
+          <button class="swap-side-button active" data-swap-side="white" type="button">White</button>
+          <button class="swap-side-button" data-swap-side="black" type="button">Black</button>
+        </div>
+        <div class="swap-piece-picker">
+          <button class="swap-piece-button active" data-swap-from="r" type="button">From: Rook</button>
+          <button class="swap-piece-button" data-swap-from="n" type="button">From: Knight</button>
+          <button class="swap-piece-button" data-swap-from="b" type="button">From: Bishop</button>
+          <button class="swap-piece-button" data-swap-from="z" type="button">From: Wizard</button>
+        </div>
+        <div class="swap-piece-picker">
+          <button class="swap-piece-button" data-swap-to="r" type="button">To: Rook</button>
+          <button class="swap-piece-button" data-swap-to="n" type="button">To: Knight</button>
+          <button class="swap-piece-button" data-swap-to="b" type="button">To: Bishop</button>
+          <button class="swap-piece-button" data-swap-to="z" type="button">To: Wizard</button>
+        </div>
+      </div>
+      <div id="chess-board" class="chessBoard" aria-label="Chess board"></div>
+    </main>
+
+    <script src="chessRules.js?v=20260627"></script>
+    <script src="main.js?v=20260627"></script>
+  </body>
+</html>

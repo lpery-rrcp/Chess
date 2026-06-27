@@ -11,6 +11,23 @@ function getPieceColor(pieceCode) {
   return pieceCode.startsWith("w") ? "white" : "black";
 }
 
+function normalizeSwapSide(input) {
+  if (typeof input !== "string") {
+    return null;
+  }
+
+  const normalized = input.trim().toLowerCase();
+  if (normalized === "white" || normalized === "w") {
+    return "white";
+  }
+
+  if (normalized === "black" || normalized === "b") {
+    return "black";
+  }
+
+  return null;
+}
+
 // checks for same color pieces (used for move validation and highlighting)
 function isSameColor(pieceCode, otherPieceCode) {
   return getPieceColor(pieceCode) === getPieceColor(otherPieceCode);

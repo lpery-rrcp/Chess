@@ -57,6 +57,24 @@ assert.strictEqual(
 );
 
 assert.strictEqual(
+  context.normalizeSwapSide('white'),
+  'white',
+  'White should be accepted as a swap-side selection.'
+);
+
+assert.strictEqual(
+  context.normalizeSwapSide('BLACK'),
+  'black',
+  'Black should be accepted as a swap-side selection.'
+);
+
+assert.strictEqual(
+  context.normalizeSwapSide('maybe'),
+  null,
+  'Invalid swap-side input should be rejected.'
+);
+
+assert.strictEqual(
   context.canSwapPieces('wR', 'bB'),
   true,
   'A rook and bishop should be allowed to swap.'

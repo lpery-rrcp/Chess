@@ -14,6 +14,8 @@ const pieceNames = {
   z: "Wizard"
 };
 
+const STORAGE_KEY = "chess-board-state";
+
 const initialBoard = [
   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
   ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
@@ -28,6 +30,7 @@ const initialBoard = [
 let boardState = initialBoard.map((row) => [...row]);
 let draggedPiece = null;
 let currentTurn = "white";
+let hasGameStarted = false;
 let isSwapMode = false;
 let isSetupMode = false;
 let selectedSwapPiece = null;
@@ -39,6 +42,35 @@ let selectedSwapTo = "z";
 
 const swapControls = document.getElementById("bulk-swap-controls");
 const swapAllButton = document.getElementById("swap-all-button");
+const startGameButton = document.getElementById("start-game-button");
+
+function loadPersistedBoardState() {
+  try {
+    const storedState = localStorage.getItem(STORAGE_KEY);
+    if (!storedState) {
+      return;
+    }
+
+    const parsedState = JSON.parse(storedState);
+    if (Array.isArray(parsedState?.boardState)) {
+      boardState = parsedState.boardState.map((row) => [...row]);
+    }
+
+    if (parsedState?.currentTurn) {
+      currentTurn = parsedState.currentTurn;
+    }
+  } catch (error) {
+    console.warn("Unable to restore board state", error);
+  }
+}
+
+function saveBoardState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ boardState, currentTurn }));
+  } catch (error) {
+    console.warn("Unable to save board state", error);
+  }
+}
 
 function isProtectedPieceCode(pieceCode) {
   if (!pieceCode) {
@@ -74,6 +106,11 @@ if (swapAllButton) {
   swapAllButton.addEventListener("click", performSwapAll);
 }
 
+if (startGameButton) {
+  startGameButton.addEventListener("click", startGame);
+}
+
+loadPersistedBoardState();
 renderBoard();
 
 boardElement.addEventListener("dragstart", handleDragStart);
@@ -98,6 +135,7 @@ function updateSwapButton() {
     return;
   }
 
+  swapButton.disabled = hasGameStarted;
   swapButton.textContent = isSwapMode ? "Cancel Swap" : "Swap Pieces";
   swapButton.classList.toggle("active", isSwapMode);
 }
@@ -107,7 +145,7 @@ function updateSwapControls() {
     return;
   }
 
-  swapControls.hidden = !isSwapMode;
+  swapControls.hidden = !isSwapMode || hasGameStarted;
   swapControls.querySelectorAll(".swap-side-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.swapSide === selectedSwapSide);
   });
@@ -138,6 +176,11 @@ function updateSetupControls() {
   setupControls.querySelectorAll(".setup-piece-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.setupPiece === selectedSetupPiece);
   });
+}
+
+function startGame() {
+  saveBoardState();
+  window.location.href = "index.html";
 }
 
 function renderBoard() {
@@ -194,6 +237,7 @@ function renderBoard() {
   updateSwapButton();
   updateSwapControls();
   updateSetupControls();
+  saveBoardState();
 }
 
 function createPiece(pieceCode) {
@@ -218,10 +262,33 @@ function createPiece(pieceCode) {
 }
 
 function toggleSwapMode() {
-  isSwapMode = !isSwapMode;
-  if (isSwapMode) {
-    isSetupMode = false;
+  if (hasGameStarted) {
+    window.alert("Swap pieces can only be used before the first move.");
+    return;
   }
+
+  if (isSwapMode) {
+    isSwapMode = false;
+    selectedSwapPiece = null;
+    updateSwapButton();
+    renderBoard();
+    return;
+  }
+
+  const sidePrompt = window.prompt("Which side do you want to change? Enter white or black.");
+  if (sidePrompt === null) {
+    return;
+  }
+
+  const chosenSide = normalizeSwapSide(sidePrompt);
+  if (!chosenSide) {
+    window.alert("Please enter white or black.");
+    return;
+  }
+
+  selectedSwapSide = chosenSide;
+  isSetupMode = false;
+  isSwapMode = true;
   selectedSwapPiece = null;
   updateSwapButton();
   renderBoard();
@@ -325,7 +392,7 @@ function handleBoardClick(event) {
     return;
   }
 
-  if (!isSwapMode) {
+  if (!isSwapMode || hasGameStarted) {
     return;
   }
 
@@ -338,7 +405,7 @@ function handleBoardClick(event) {
   const col = Number(square.dataset.col);
   const clickedPiece = boardState[row]?.[col];
 
-  if (!clickedPiece || getPieceColor(clickedPiece) !== currentTurn) {
+  if (!clickedPiece || getPieceColor(clickedPiece) !== selectedSwapSide) {
     return;
   }
 
@@ -494,7 +561,13 @@ function handleDrop(event) {
     }
   }
 
+  hasGameStarted = true;
   currentTurn = currentTurn === "white" ? "black" : "white";
+
+  if (isSwapMode) {
+    isSwapMode = false;
+    selectedSwapPiece = null;
+  }
 
   clearHighlight();
   renderBoard();

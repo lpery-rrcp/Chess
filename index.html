@@ -6,39 +6,13 @@
     <title>Chess Board</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
+  <body data-page-mode="game">
     <main class="app-shell">
       <h1 class="app-title">Interactive Chess Board</h1>
       <p id="turn-indicator" class="turn-indicator">White to move</p>
       <div class="board-actions">
-        <button id="swap-mode-button" class="swap-button" type="button">Swap Pieces</button>
         <button id="setup-mode-button" class="swap-button" type="button">Custom Setup</button>
-        <span id="swap-help" class="swap-help">Choose two eligible pieces to swap, or use Swap All to exchange selected piece types.</span>
-      </div>
-      <div id="bulk-swap-controls" class="swap-controls">
-        <div class="swap-side-picker">
-          <button class="swap-side-button active" data-swap-side="white" type="button">White</button>
-          <button class="swap-side-button" data-swap-side="black" type="button">Black</button>
-        </div>
-        <div class="swap-piece-picker">
-          <button class="swap-piece-button active" data-swap-from="r" type="button">From: Rook</button>
-          <button class="swap-piece-button" data-swap-from="n" type="button">From: Knight</button>
-          <button class="swap-piece-button" data-swap-from="b" type="button">From: Bishop</button>
-          <button class="swap-piece-button" data-swap-from="z" type="button">From: Wizard</button>
-          <button class="swap-piece-button" data-swap-from="q" type="button">From: Queen</button>
-          <button class="swap-piece-button" data-swap-from="k" type="button">From: King</button>
-          <button class="swap-piece-button" data-swap-from="p" type="button">From: Pawn</button>
-        </div>
-        <div class="swap-piece-picker">
-          <button class="swap-piece-button" data-swap-to="r" type="button">To: Rook</button>
-          <button class="swap-piece-button" data-swap-to="n" type="button">To: Knight</button>
-          <button class="swap-piece-button" data-swap-to="b" type="button">To: Bishop</button>
-          <button class="swap-piece-button" data-swap-to="z" type="button">To: Wizard</button>
-          <button class="swap-piece-button" data-swap-to="q" type="button">To: Queen</button>
-          <button class="swap-piece-button" data-swap-to="k" type="button">To: King</button>
-          <button class="swap-piece-button" data-swap-to="p" type="button">To: Pawn</button>
-        </div>
-        <button id="swap-all-button" class="swap-button" type="button">Swap All</button>
+        <a class="swap-button" href="swap.html">Back to Setup</a>
       </div>
       <div id="setup-controls" class="setup-controls" hidden>
         <div class="setup-side-picker">
@@ -56,7 +30,7 @@
       <div id="chess-board" class="chessBoard" aria-label="Chess board"></div>
     </main>
 
-    <script src="chessRules.js?v=20260613"></script>
-    <script src="main.js?v=20260613"></script>
+    <script src="chessRules.js?v=20260627"></script>
+    <script src="main.js?v=20260627"></script>
   </body>
 </html>
