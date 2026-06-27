@@ -3,6 +3,7 @@ const turnIndicator = document.getElementById("turn-indicator");
 const swapButton = document.getElementById("swap-mode-button");
 const setupButton = document.getElementById("setup-mode-button");
 const setupControls = document.getElementById("setup-controls");
+const pageMode = document.body?.dataset.pageMode || "game";
 
 const pieceNames = {
   r: "Rook",
@@ -86,23 +87,23 @@ function isProtectedSetupPlacement(row, col) {
   return isProtectedPieceCode(currentPiece);
 }
 
-if (swapButton) {
+if (pageMode === "swap" && swapButton) {
   swapButton.addEventListener("click", toggleSwapMode);
 }
 
-if (setupButton) {
+if (pageMode === "game" && setupButton) {
   setupButton.addEventListener("click", toggleSetupMode);
 }
 
-if (setupControls) {
+if (pageMode === "game" && setupControls) {
   setupControls.addEventListener("click", handleSetupControlsClick);
 }
 
-if (swapControls) {
+if (pageMode === "swap" && swapControls) {
   swapControls.addEventListener("click", handleSwapControlsClick);
 }
 
-if (swapAllButton) {
+if (pageMode === "swap" && swapAllButton) {
   swapAllButton.addEventListener("click", performSwapAll);
 }
 
@@ -113,11 +114,14 @@ if (startGameButton) {
 loadPersistedBoardState();
 renderBoard();
 
-boardElement.addEventListener("dragstart", handleDragStart);
-boardElement.addEventListener("dragover", handleDragOver);
-boardElement.addEventListener("dragleave", handleDragLeave);
-boardElement.addEventListener("drop", handleDrop);
-boardElement.addEventListener("dragend", clearHighlight);
+if (pageMode === "game") {
+  boardElement.addEventListener("dragstart", handleDragStart);
+  boardElement.addEventListener("dragover", handleDragOver);
+  boardElement.addEventListener("dragleave", handleDragLeave);
+  boardElement.addEventListener("drop", handleDrop);
+  boardElement.addEventListener("dragend", clearHighlight);
+}
+
 boardElement.addEventListener("click", handleBoardClick);
 
 function capitalize(word) {
