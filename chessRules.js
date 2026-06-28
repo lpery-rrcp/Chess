@@ -381,3 +381,93 @@ function canKingMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow
     return false;
 }
 
+function findKing(boardState, kingColor) {
+    const kingCode = kingColor === "white" ? "wK" : "bK";
+    for (let row = 0; row < 8; row += 1) {
+        for (let col = 0; col < 8; col += 1) {
+            if (boardState[row][col] === kingCode) {
+                return { row, col };
+            }
+        }
+    }
+    return null;
+}
+
+function isKingInCheck(boardState, kingColor) {
+    const kingPos = findKing(boardState, kingColor);
+    if (!kingPos) {
+        return false;
+    }
+
+    const opponentColor = kingColor === "white" ? "black" : "white";
+    return isSquareAttacked(boardState, kingPos.row, kingPos.col, opponentColor);
+}
+
+function hasLegalMoves(boardState, playerColor) {
+    for (let sourceRow = 0; sourceRow < 8; sourceRow += 1) {
+        for (let sourceCol = 0; sourceCol < 8; sourceCol += 1) {
+            const pieceCode = boardState[sourceRow][sourceCol];
+            if (!pieceCode || getPieceColor(pieceCode) !== playerColor) {
+                continue;
+            }
+
+            const pieceType = pieceCode[1]?.toLowerCase();
+
+            for (let targetRow = 0; targetRow < 8; targetRow += 1) {
+                for (let targetCol = 0; targetCol < 8; targetCol += 1) {
+                    if (sourceRow === targetRow && sourceCol === targetCol) {
+                        continue;
+                    }
+
+                    const targetPiece = boardState[targetRow][targetCol];
+
+                    const isMoveAllowed = pieceType === "p"
+                        ? canPawnMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+                        : pieceType === "n"
+                            ? canKnightMove(pieceCode, targetPiece, sourceRow, sourceCol, targetRow, targetCol)
+                            : pieceType === "b"
+                                ? canBishopMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+                                : pieceType === "r"
+                                    ? canRookMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+                                    : pieceType === "q"
+                                        ? canQueenMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+                                        : pieceType === "k"
+                                            ? canKingMove(pieceCode, targetPiece, sourceRow, sourceCol, targetRow, targetCol, boardState)
+                                            : pieceType === "z"
+                                                ? canWizardMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+                                                : canMoveTo(pieceCode, targetPiece);
+
+                    if (!isMoveAllowed) {
+                        continue;
+                    }
+
+                    // Simulate the move to check if it leaves the king in check
+                    const simulatedBoard = boardState.map((row) => [...row]);
+                    simulatedBoard[targetRow][targetCol] = pieceCode;
+                    simulatedBoard[sourceRow][sourceCol] = "";
+
+                    // Handle castling rook movement in simulation
+                    if (pieceType === "k" && Math.abs(targetCol - sourceCol) === 2) {
+                        const rookFromCol = targetCol > sourceCol ? 7 : 0;
+                        const rookToCol = targetCol > sourceCol ? targetCol - 1 : targetCol + 1;
+                        const rookPiece = simulatedBoard[sourceRow][rookFromCol];
+                        if (rookPiece) {
+                            simulatedBoard[sourceRow][rookToCol] = rookPiece;
+                            simulatedBoard[sourceRow][rookFromCol] = "";
+                        }
+                    }
+
+                    if (!isKingInCheck(simulatedBoard, playerColor)) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function isCheckmate(boardState, playerColor) {
+    return isKingInCheck(boardState, playerColor) && !hasLegalMoves(boardState, playerColor);
+}
+

@@ -40,10 +40,12 @@ let selectedSetupPiece = "r";
 let selectedSwapSide = "white";
 let selectedSwapFrom = "r";
 let selectedSwapTo = "z";
+let gameWinner = null;
 
 const swapControls = document.getElementById("bulk-swap-controls");
 const swapAllButton = document.getElementById("swap-all-button");
 const startGameButton = document.getElementById("start-game-button");
+const defaultBoardButton = document.getElementById("default-board-button");
 
 function loadPersistedBoardState() {
   try {
@@ -91,11 +93,11 @@ if (pageMode === "swap" && swapButton) {
   swapButton.addEventListener("click", toggleSwapMode);
 }
 
-if (pageMode === "game" && setupButton) {
+if (setupButton) {
   setupButton.addEventListener("click", toggleSetupMode);
 }
 
-if (pageMode === "game" && setupControls) {
+if (setupControls) {
   setupControls.addEventListener("click", handleSetupControlsClick);
 }
 
@@ -109,6 +111,10 @@ if (pageMode === "swap" && swapAllButton) {
 
 if (startGameButton) {
   startGameButton.addEventListener("click", startGame);
+}
+
+if (defaultBoardButton) {
+  defaultBoardButton.addEventListener("click", resetToDefaultBoard);
 }
 
 loadPersistedBoardState();
@@ -130,7 +136,11 @@ function capitalize(word) {
 
 function updateTurnIndicator() {
   if (turnIndicator) {
-    turnIndicator.textContent = `${capitalize(currentTurn)} to move`;
+    if (gameWinner) {
+      turnIndicator.textContent = `${capitalize(gameWinner)} wins by checkmate!`;
+    } else {
+      turnIndicator.textContent = `${capitalize(currentTurn)} to move`;
+    }
   }
 }
 
@@ -357,6 +367,13 @@ function handleSetupPlacement(row, col) {
   renderBoard();
 }
 
+function resetToDefaultBoard() {
+  boardState = initialBoard.map((row) => [...row]);
+  currentTurn = "white";
+  gameWinner = null;
+  renderBoard();
+}
+
 function performSwapAll() {
   if (selectedSwapFrom === selectedSwapTo) {
     return;
@@ -450,7 +467,7 @@ function handleBoardClick(event) {
 function handleDragStart(event) {
   const piece = event.target.closest(".piece");
 
-  if (!piece || isSetupMode || isSwapMode) {
+  if (!piece || isSetupMode || isSwapMode || gameWinner) {
     return;
   }
 
@@ -498,6 +515,10 @@ function handleDragLeave(event) {
 
 function handleDrop(event) {
   if (isSetupMode || isSwapMode) {
+    return;
+  }
+
+  if (gameWinner) {
     return;
   }
 
@@ -567,6 +588,11 @@ function handleDrop(event) {
 
   hasGameStarted = true;
   currentTurn = currentTurn === "white" ? "black" : "white";
+
+  // Check for checkmate on the opponent
+  if (isCheckmate(boardState, currentTurn)) {
+    gameWinner = currentTurn === "white" ? "black" : "white";
+  }
 
   if (isSwapMode) {
     isSwapMode = false;
