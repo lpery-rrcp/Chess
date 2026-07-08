@@ -46,6 +46,7 @@ const swapControls = document.getElementById("bulk-swap-controls");
 const swapAllButton = document.getElementById("swap-all-button");
 const startGameButton = document.getElementById("start-game-button");
 const defaultBoardButton = document.getElementById("default-board-button");
+const resetBoardButton = document.getElementById("reset-board-button");
 
 function loadPersistedBoardState() {
   try {
@@ -108,6 +109,10 @@ if (startGameButton) {
 
 if (defaultBoardButton) {
   defaultBoardButton.addEventListener("click", resetToDefaultBoard);
+}
+
+if (resetBoardButton) {
+  resetBoardButton.addEventListener("click", resetToDefaultBoard);
 }
 
 loadPersistedBoardState();
