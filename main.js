@@ -32,7 +32,7 @@ let boardState = initialBoard.map((row) => [...row]);
 let draggedPiece = null;
 let currentTurn = "white";
 let hasGameStarted = false;
-let isSwapMode = false;
+let isSwapMode = pageMode === "swap";
 let isSetupMode = false;
 let selectedSwapPiece = null;
 let selectedSetupSide = "white";
@@ -89,10 +89,6 @@ function isProtectedSetupPlacement(row, col) {
   return isProtectedPieceCode(currentPiece);
 }
 
-if (pageMode === "swap" && swapButton) {
-  swapButton.addEventListener("click", toggleSwapMode);
-}
-
 if (setupButton) {
   setupButton.addEventListener("click", toggleSetupMode);
 }
@@ -102,11 +98,8 @@ if (setupControls) {
 }
 
 if (pageMode === "swap" && swapControls) {
+  swapControls.addEventListener("change", handleSwapControlsChange);
   swapControls.addEventListener("click", handleSwapControlsClick);
-}
-
-if (pageMode === "swap" && swapAllButton) {
-  swapAllButton.addEventListener("click", performSwapAll);
 }
 
 if (startGameButton) {
@@ -160,18 +153,22 @@ function updateSwapControls() {
   }
 
   swapControls.hidden = !isSwapMode || hasGameStarted;
-  swapControls.querySelectorAll(".swap-side-button").forEach((button) => {
-    button.classList.toggle("active", button.dataset.swapSide === selectedSwapSide);
-  });
 
-  swapControls.querySelectorAll(".swap-piece-button").forEach((button) => {
-    if (button.dataset.swapFrom) {
-      button.classList.toggle("active", button.dataset.swapFrom === selectedSwapFrom);
-    }
-    if (button.dataset.swapTo) {
-      button.classList.toggle("active", button.dataset.swapTo === selectedSwapTo);
-    }
-  });
+  const sideSelect = document.getElementById("swap-side-select");
+  const fromSelect = document.getElementById("swap-from-select");
+  const toSelect = document.getElementById("swap-to-select");
+
+  if (sideSelect) {
+    sideSelect.value = selectedSwapSide;
+  }
+
+  if (fromSelect) {
+    fromSelect.value = selectedSwapFrom;
+  }
+
+  if (toSelect) {
+    toSelect.value = selectedSwapTo;
+  }
 }
 
 function updateSetupControls() {
@@ -275,71 +272,43 @@ function createPiece(pieceCode) {
   return piece;
 }
 
-function toggleSwapMode() {
-  if (hasGameStarted) {
-    window.alert("Swap pieces can only be used before the first move.");
-    return;
-  }
-
-  if (isSwapMode) {
-    isSwapMode = false;
-    selectedSwapPiece = null;
-    updateSwapButton();
-    renderBoard();
-    return;
-  }
-
-  const sidePrompt = window.prompt("Which side do you want to change? Enter white or black.");
-  if (sidePrompt === null) {
-    return;
-  }
-
-  const chosenSide = normalizeSwapSide(sidePrompt);
-  if (!chosenSide) {
-    window.alert("Please enter white or black.");
-    return;
-  }
-
-  selectedSwapSide = chosenSide;
-  isSetupMode = false;
-  isSwapMode = true;
-  selectedSwapPiece = null;
-  updateSwapButton();
-  renderBoard();
-}
-
 function toggleSetupMode() {
   isSetupMode = !isSetupMode;
   if (isSetupMode) {
     isSwapMode = false;
+  } else if (pageMode === "swap") {
+    isSwapMode = true;
   }
   renderBoard();
 }
 
+function handleSwapControlsChange(event) {
+  const target = event.target;
+
+  if (target.id === "swap-side-select") {
+    selectedSwapSide = target.value;
+  } else if (target.id === "swap-from-select") {
+    selectedSwapFrom = target.value;
+  } else if (target.id === "swap-to-select") {
+    selectedSwapTo = target.value;
+  }
+
+  renderBoard();
+}
+
 function handleSwapControlsClick(event) {
-  const sideButton = event.target.closest("[data-swap-side]");
-  if (sideButton) {
-    selectedSwapSide = sideButton.dataset.swapSide;
-    renderBoard();
-    return;
-  }
-
-  const fromButton = event.target.closest("[data-swap-from]");
-  if (fromButton) {
-    selectedSwapFrom = fromButton.dataset.swapFrom;
-    renderBoard();
-    return;
-  }
-
-  const toButton = event.target.closest("[data-swap-to]");
-  if (toButton) {
-    selectedSwapTo = toButton.dataset.swapTo;
-    renderBoard();
-    return;
+  if (event.target.closest("#swap-all-button")) {
+    performSwapAll();
   }
 }
 
 function handleSetupControlsClick(event) {
+  const defaultButton = event.target.closest("#default-board-button");
+  if (defaultButton) {
+    resetToDefaultBoard();
+    return;
+  }
+
   const sideButton = event.target.closest("[data-setup-side]");
   if (sideButton) {
     selectedSetupSide = sideButton.dataset.setupSide;
@@ -351,7 +320,9 @@ function handleSetupControlsClick(event) {
   if (pieceButton) {
     selectedSetupPiece = pieceButton.dataset.setupPiece;
     renderBoard();
+    return;
   }
+
 }
 
 function handleSetupPlacement(row, col) {
@@ -379,25 +350,43 @@ function performSwapAll() {
     return;
   }
 
-  const fromCode = selectedSwapFrom.toLowerCase();
-  const toCode = selectedSwapTo.toLowerCase();
-  const sidePrefix = selectedSwapSide[0];
-
-  for (let row = 0; row < boardState.length; row += 1) {
-    for (let col = 0; col < boardState[row].length; col += 1) {
-      const pieceCode = boardState[row][col];
-      if (!pieceCode || pieceCode[0] !== sidePrefix) {
-        continue;
-      }
-      const pieceType = pieceCode[1]?.toLowerCase();
-      if (pieceType === fromCode) {
-        boardState[row][col] = `${sidePrefix}${toCode.toUpperCase()}`;
-      }
-    }
-  }
-
+  bulkSwapPieces(boardState, selectedSwapSide, selectedSwapFrom, selectedSwapTo);
   selectedSwapPiece = null;
   renderBoard();
+}
+
+function handleSwapSelection(row, col) {
+  const clickedPiece = boardState[row]?.[col];
+  if (!clickedPiece || getPieceColor(clickedPiece) !== selectedSwapSide || !isSwapEligible(clickedPiece)) {
+    return "ignored";
+  }
+
+  if (!selectedSwapPiece) {
+    selectedSwapPiece = { row, col };
+    renderBoard();
+    return "selected";
+  }
+
+  const selectedRow = selectedSwapPiece.row;
+  const selectedCol = selectedSwapPiece.col;
+  const selectedPiece = boardState[selectedRow]?.[selectedCol];
+
+  if (!selectedPiece || (selectedRow === row && selectedCol === col)) {
+    selectedSwapPiece = null;
+    renderBoard();
+    return "cleared";
+  }
+
+  if (!canSwapPieces(selectedPiece, clickedPiece)) {
+    selectedSwapPiece = null;
+    renderBoard();
+    return "cleared";
+  }
+
+  const swapped = swapPiecesOnBoard(boardState, selectedRow, selectedCol, row, col);
+  selectedSwapPiece = null;
+  renderBoard();
+  return swapped ? "swapped" : "ignored";
 }
 
 function handleBoardClick(event) {
@@ -409,6 +398,7 @@ function handleBoardClick(event) {
 
     const row = Number(square.dataset.row);
     const col = Number(square.dataset.col);
+
     handleSetupPlacement(row, col);
     return;
   }
@@ -424,44 +414,12 @@ function handleBoardClick(event) {
 
   const row = Number(square.dataset.row);
   const col = Number(square.dataset.col);
-  const clickedPiece = boardState[row]?.[col];
+  const swapAction = handleSwapSelection(row, col);
 
-  if (!clickedPiece || getPieceColor(clickedPiece) !== selectedSwapSide) {
-    return;
+  if (swapAction === "swapped") {
+    isSwapMode = false;
+    updateSwapButton();
   }
-
-  if (!isSwapEligible(clickedPiece)) {
-    return;
-  }
-
-  if (!selectedSwapPiece) {
-    selectedSwapPiece = { row, col };
-    renderBoard();
-    return;
-  }
-
-  const selectedRow = selectedSwapPiece.row;
-  const selectedCol = selectedSwapPiece.col;
-  const selectedPiece = boardState[selectedRow]?.[selectedCol];
-
-  if (!selectedPiece || (selectedRow === row && selectedCol === col)) {
-    selectedSwapPiece = null;
-    renderBoard();
-    return;
-  }
-
-  if (!canSwapPieces(selectedPiece, clickedPiece)) {
-    selectedSwapPiece = null;
-    renderBoard();
-    return;
-  }
-
-  boardState[selectedRow][selectedCol] = clickedPiece;
-  boardState[row][col] = selectedPiece;
-  selectedSwapPiece = null;
-  isSwapMode = false;
-  updateSwapButton();
-  renderBoard();
 }
 
 function handleDragStart(event) {

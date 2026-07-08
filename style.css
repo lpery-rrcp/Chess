@@ -70,9 +70,7 @@ body {
 }
 
 .setup-side-picker,
-.setup-piece-picker,
-.swap-side-picker,
-.swap-piece-picker {
+.setup-piece-picker {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
@@ -85,14 +83,37 @@ body {
   padding: 0.5rem 0;
 }
 
+.swap-control-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.swap-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.swap-select {
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.75rem;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-weight: 600;
+}
+
 #swap-all-button {
-  min-width: 160px;
+  min-width: 180px;
 }
 
 .setup-side-button,
-.setup-piece-button,
-.swap-side-button,
-.swap-piece-button {
+.setup-piece-button {
   border: none;
   background: #334155;
   color: #e2e8f0;
@@ -102,9 +123,7 @@ body {
 }
 
 .setup-side-button.active,
-.setup-piece-button.active,
-.swap-side-button.active,
-.swap-piece-button.active {
+.setup-piece-button.active {
   background: #22c55e;
   color: #0f172a;
 }
@@ -202,6 +221,10 @@ body {
 @media (max-width: 600px) {
   .app-shell {
     width: 100%;
+  }
+
+  .swap-control-grid {
+    grid-template-columns: 1fr;
   }
 
   .chessBoard {
