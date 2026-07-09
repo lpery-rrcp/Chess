@@ -550,11 +550,21 @@ function handleDrop(event) {
   }
 
   hasGameStarted = true;
-  currentTurn = currentTurn === "white" ? "black" : "white";
 
-  // Check for checkmate on the opponent
-  if (isCheckmate(boardState, currentTurn)) {
-    gameWinner = currentTurn === "white" ? "black" : "white";
+  const kingCaptureWinner = getWinnerFromKingCapture(getPieceColor(movedPiece), targetPiece);
+  if (kingCaptureWinner) {
+    gameWinner = kingCaptureWinner;
+  } else {
+    currentTurn = currentTurn === "white" ? "black" : "white";
+
+    // Check for checkmate on the opponent
+    if (isCheckmate(boardState, currentTurn)) {
+      gameWinner = currentTurn === "white" ? "black" : "white";
+    }
+  }
+
+  if (gameWinner) {
+    window.alert(`${capitalize(gameWinner)} wins by capturing the king!`);
   }
 
   if (isSwapMode) {

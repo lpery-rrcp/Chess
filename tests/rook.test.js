@@ -98,4 +98,26 @@ assert.strictEqual(
   'A pawn should not be allowed to swap.'
 );
 
+const kingCaptureBoard = [
+  ['wK', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['bR', '', '', '', '', '', '', '']
+];
+
+assert.strictEqual(
+  context.getWinnerFromKingCapture('black', 'wK'),
+  'black',
+  'A move that captures the opposing king should award the capturing side the win.'
+);
+assert.strictEqual(
+  context.isKingCaptured('wK'),
+  true,
+  'A white king piece code should be recognized as a king capture target.'
+);
+
 console.log('Rook move tests passed.');

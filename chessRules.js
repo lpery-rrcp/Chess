@@ -546,6 +546,22 @@ function hasLegalMoves(boardState, playerColor) {
     return false;
 }
 
+function isKingCaptured(pieceCode) {
+    return pieceCode === "wK" || pieceCode === "bK";
+}
+
+function getWinnerFromKingCapture(capturingColor, capturedKingCode) {
+    if (capturingColor === "white" && capturedKingCode === "bK") {
+        return "white";
+    }
+
+    if (capturingColor === "black" && capturedKingCode === "wK") {
+        return "black";
+    }
+
+    return null;
+}
+
 function isCheckmate(boardState, playerColor) {
     return isKingInCheck(boardState, playerColor) && !hasLegalMoves(boardState, playerColor);
 }
