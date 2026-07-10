@@ -120,4 +120,70 @@ assert.strictEqual(
   'A white king piece code should be recognized as a king capture target.'
 );
 
+const checkBoard = [
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['wR', '', '', '', 'bK', '', '', '']
+];
+
+assert.strictEqual(
+  context.isInCheck(checkBoard, 'black'),
+  true,
+  'Black should be in check from a rook on the same rank.'
+);
+assert.strictEqual(
+  context.isEitherKingInCheck(checkBoard),
+  true,
+  'Either king check helper should return true when one side is in check.'
+);
+assert.deepStrictEqual(
+  context.getCheckStatus(checkBoard),
+  {
+    whiteInCheck: false,
+    blackInCheck: true,
+    whiteInCheckmate: false,
+    blackInCheckmate: false,
+    winner: null
+  },
+  'Check status should report only black in check.'
+);
+
+const checkmateBoard = [
+  ['', '', '', '', '', '', '', 'bK'],
+  ['', '', '', '', '', '', '', 'wR'],
+  ['', '', '', '', '', '', 'wQ', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', 'wK', '', '', '']
+];
+
+assert.strictEqual(
+  context.isInCheck(checkmateBoard, 'black'),
+  true,
+  'Black should be in check in the mate position.'
+);
+assert.strictEqual(
+  context.isCheckmate(checkmateBoard, 'black'),
+  true,
+  'Black should be in checkmate in the mate position.'
+);
+assert.deepStrictEqual(
+  context.getCheckStatus(checkmateBoard),
+  {
+    whiteInCheck: false,
+    blackInCheck: true,
+    whiteInCheckmate: false,
+    blackInCheckmate: true,
+    winner: 'white'
+  },
+  'Check status should report black checkmate and white as the winner.'
+);
+
 console.log('Rook move tests passed.');

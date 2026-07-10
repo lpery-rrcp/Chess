@@ -32,7 +32,10 @@
       <div id="chess-board" class="chessBoard" aria-label="Chess board"></div>
     </main>
 
-    <script src="chessRules.js?v=20260709"></script>
-    <script src="main.js?v=20260709"></script>
+    <script>
+      const cacheBuster = Date.now();
+      document.write('<script src="chessRules.js?v=' + cacheBuster + '"><\/script>');
+      document.write('<script src="main.js?v=' + cacheBuster + '"><\/script>');
+    </script>
   </body>
 </html>

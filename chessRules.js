@@ -482,6 +482,29 @@ function isKingInCheck(boardState, kingColor) {
     return isSquareAttacked(boardState, kingPos.row, kingPos.col, opponentColor);
 }
 
+function isInCheck(boardState, playerColor) {
+    return isKingInCheck(boardState, playerColor);
+}
+
+function isEitherKingInCheck(boardState) {
+    return isKingInCheck(boardState, "white") || isKingInCheck(boardState, "black");
+}
+
+function getCheckStatus(boardState) {
+    const whiteInCheck = isKingInCheck(boardState, "white");
+    const blackInCheck = isKingInCheck(boardState, "black");
+    const whiteInCheckmate = whiteInCheck && !hasLegalMoves(boardState, "white");
+    const blackInCheckmate = blackInCheck && !hasLegalMoves(boardState, "black");
+
+    return {
+        whiteInCheck,
+        blackInCheck,
+        whiteInCheckmate,
+        blackInCheckmate,
+        winner: whiteInCheckmate ? "black" : blackInCheckmate ? "white" : null
+    };
+}
+
 function hasLegalMoves(boardState, playerColor) {
     for (let sourceRow = 0; sourceRow < 8; sourceRow += 1) {
         for (let sourceCol = 0; sourceCol < 8; sourceCol += 1) {
