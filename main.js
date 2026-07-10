@@ -16,6 +16,7 @@ const pieceNames = {
 };
 
 const STORAGE_KEY = "chess-board-state";
+const STORAGE_VERSION = 1;
 
 const initialBoard = [
   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -56,6 +57,10 @@ function loadPersistedBoardState() {
     }
 
     const parsedState = JSON.parse(storedState);
+    if (parsedState?.version !== STORAGE_VERSION) {
+      return;
+    }
+
     if (Array.isArray(parsedState?.boardState)) {
       boardState = parsedState.boardState.map((row) => [...row]);
     }
@@ -70,7 +75,10 @@ function loadPersistedBoardState() {
 
 function saveBoardState() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ boardState, currentTurn }));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: STORAGE_VERSION, boardState, currentTurn })
+    );
   } catch (error) {
     console.warn("Unable to save board state", error);
   }
@@ -346,7 +354,12 @@ function handleSetupPlacement(row, col) {
 function resetToDefaultBoard() {
   boardState = initialBoard.map((row) => [...row]);
   currentTurn = "white";
+  hasGameStarted = false;
+  isSetupMode = false;
+  isSwapMode = pageMode === "swap";
+  selectedSwapPiece = null;
   gameWinner = null;
+  localStorage.removeItem(STORAGE_KEY);
   renderBoard();
 }
 
@@ -564,7 +577,10 @@ function handleDrop(event) {
   }
 
   if (gameWinner) {
-    window.alert(`${capitalize(gameWinner)} wins by capturing the king!`);
+    const winReason = kingCaptureWinner ? "capturing the king" : "checkmate";
+    window.alert(`${capitalize(gameWinner)} wins by ${winReason}!`);
+    resetToDefaultBoard();
+    return;
   }
 
   if (isSwapMode) {
