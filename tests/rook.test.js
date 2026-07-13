@@ -205,4 +205,36 @@ assert.strictEqual(
   'A move that leaves the white king in check should be rejected.'
 );
 
+const wizardEscapeBoard = [
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['wZ', '', '', '', '', '', '', ''],
+  ['wK', 'bR', '', '', '', '', '', '']
+];
+
+assert.strictEqual(
+  context.isCheckmate(wizardEscapeBoard, 'white'),
+  false,
+  'A side with a wizard swap that can escape check should not be checkmated.'
+);
+
+const wizardSwapBoard = [
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['wZ', '', '', '', '', '', '', ''],
+  ['wK', '', '', '', '', '', '', '']
+];
+
+const simulatedWizardBoard = context.simulateMove(wizardSwapBoard, 6, 0, 7, 0);
+assert.strictEqual(simulatedWizardBoard[6][0], 'wK', 'The wizard swap should leave the king on the wizard\'s original square.');
+assert.strictEqual(simulatedWizardBoard[7][0], 'wZ', 'The wizard swap should move onto the king\'s original square.');
+
 console.log('Rook move tests passed.');

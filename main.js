@@ -576,8 +576,13 @@ function handleDrop(event) {
     return;
   }
 
-  boardState[targetRow][targetCol] = movedPiece;
-  boardState[sourceRow][sourceCol] = "";
+  if (pieceType === "z" && targetPiece && isSameColor(movedPiece, targetPiece)) {
+    boardState[sourceRow][sourceCol] = targetPiece;
+    boardState[targetRow][targetCol] = movedPiece;
+  } else {
+    boardState[targetRow][targetCol] = movedPiece;
+    boardState[sourceRow][sourceCol] = "";
+  }
 
   if (pieceType === "k" && Math.abs(targetCol - sourceCol) === 2) {
     const rookFromCol = targetCol > sourceCol ? 7 : 0;
@@ -594,18 +599,14 @@ function handleDrop(event) {
 
   const kingCaptureWinner = getWinnerFromKingCapture(getPieceColor(movedPiece), targetPiece);
   if (kingCaptureWinner) {
-    gameWinner = kingCaptureWinner;
-  } else {
-    currentTurn = currentTurn === "white" ? "black" : "white";
-
-    // Check for checkmate on the opponent
-    if (isCheckmate(boardState, currentTurn)) {
-      gameWinner = currentTurn === "white" ? "black" : "white";
-    }
+    finishGame(kingCaptureWinner, "capture");
+    return;
   }
 
-  if (gameWinner) {
-    renderBoard();
+  currentTurn = currentTurn === "white" ? "black" : "white";
+
+  if (isCheckmate(boardState, currentTurn)) {
+    finishGame(currentTurn === "white" ? "black" : "white", "checkmate");
     return;
   }
 
@@ -616,6 +617,18 @@ function handleDrop(event) {
 
   clearHighlight();
   renderBoard();
+}
+
+function finishGame(winner, reason) {
+  gameWinner = winner;
+  renderBoard();
+
+  const message = reason === "checkmate"
+    ? `${capitalize(winner)} is in checkmate.`
+    : `${capitalize(winner)} wins by capturing the king.`;
+
+  window.alert(message);
+  resetToDefaultBoard();
 }
 
 function clearHighlight() {

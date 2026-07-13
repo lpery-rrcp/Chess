@@ -321,15 +321,22 @@ function canKingMove(pieceCode, targetPieceCode, sourceRow, sourceCol, targetRow
 function simulateMove(boardState, sourceRow, sourceCol, targetRow, targetCol) {
   const simulatedBoard = boardState.map((row) => [...row]);
   const pieceCode = simulatedBoard[sourceRow]?.[sourceCol];
+  const targetPieceCode = simulatedBoard[targetRow]?.[targetCol];
 
   if (!pieceCode) {
+    return simulatedBoard;
+  }
+
+  const pieceType = pieceCode[1]?.toLowerCase();
+  if (pieceType === "z" && targetPieceCode && isSameColor(pieceCode, targetPieceCode)) {
+    simulatedBoard[sourceRow][sourceCol] = targetPieceCode;
+    simulatedBoard[targetRow][targetCol] = pieceCode;
     return simulatedBoard;
   }
 
   simulatedBoard[targetRow][targetCol] = pieceCode;
   simulatedBoard[sourceRow][sourceCol] = "";
 
-  const pieceType = pieceCode[1]?.toLowerCase();
   if (pieceType === "k" && Math.abs(targetCol - sourceCol) === 2) {
     const rookFromCol = targetCol > sourceCol ? 7 : 0;
     const rookToCol = targetCol > sourceCol ? targetCol - 1 : targetCol + 1;
