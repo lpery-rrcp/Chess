@@ -2,10 +2,12 @@ const fs = require('fs');
 const vm = require('vm');
 const assert = require('assert');
 
-const code = fs.readFileSync('chessRules.js', 'utf8');
+const codeRules = fs.readFileSync('chessRules.js', 'utf8');
+const codeMovement = fs.readFileSync('chessmovement.js', 'utf8');
 const context = { console };
 vm.createContext(context);
-vm.runInContext(code, context);
+vm.runInContext(codeRules, context);
+vm.runInContext(codeMovement, context);
 
 const board = [
   ['wR', '', '', '', '', '', '', ''],

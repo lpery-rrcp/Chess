@@ -33,6 +33,18 @@ body {
   text-align: center;
 }
 
+.status-indicator {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.status-indicator.warning {
+  color: #fca5a5;
+  font-weight: 700;
+}
+
 .board-actions {
   display: flex;
   align-items: center;

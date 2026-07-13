@@ -2,10 +2,12 @@ const fs = require('fs');
 const vm = require('vm');
 const assert = require('assert');
 
-const code = fs.readFileSync('chessRules.js', 'utf8');
+const codeRules = fs.readFileSync('chessRules.js', 'utf8');
+const codeMovement = fs.readFileSync('chessmovement.js', 'utf8');
 const context = { console };
 vm.createContext(context);
-vm.runInContext(code, context);
+vm.runInContext(codeRules, context);
+vm.runInContext(codeMovement, context);
 
 const board = [
   ['', '', '', '', '', '', '', ''],
@@ -142,7 +144,7 @@ assert.strictEqual(
   'Either king check helper should return true when one side is in check.'
 );
 assert.deepStrictEqual(
-  context.getCheckStatus(checkBoard),
+  { ...context.getCheckStatus(checkBoard) },
   {
     whiteInCheck: false,
     blackInCheck: true,
@@ -175,7 +177,7 @@ assert.strictEqual(
   'Black should be in checkmate in the mate position.'
 );
 assert.deepStrictEqual(
-  context.getCheckStatus(checkmateBoard),
+  { ...context.getCheckStatus(checkmateBoard) },
   {
     whiteInCheck: false,
     blackInCheck: true,
@@ -184,6 +186,23 @@ assert.deepStrictEqual(
     winner: 'white'
   },
   'Check status should report black checkmate and white as the winner.'
+);
+
+const illegalKingExposingBoard = [
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['wP', '', '', '', '', '', '', ''],
+  ['wK', 'bR', '', '', '', '', '', '']
+];
+
+assert.strictEqual(
+  context.isMoveLegal(illegalKingExposingBoard, 6, 0, 5, 0, 'white'),
+  false,
+  'A move that leaves the white king in check should be rejected.'
 );
 
 console.log('Rook move tests passed.');

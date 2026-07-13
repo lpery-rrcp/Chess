@@ -1,5 +1,6 @@
 const boardElement = document.getElementById("chess-board");
 const turnIndicator = document.getElementById("turn-indicator");
+const statusIndicator = document.getElementById("status-indicator");
 const swapButton = document.getElementById("swap-mode-button");
 const setupButton = document.getElementById("setup-mode-button");
 const setupControls = document.getElementById("setup-controls");
@@ -150,6 +151,34 @@ function updateTurnIndicator() {
   }
 }
 
+function updateStatusIndicator() {
+  if (!statusIndicator) {
+    return;
+  }
+
+  const checkStatus = getCheckStatus(boardState);
+  const activeSide = currentTurn;
+  const activeInCheck = activeSide === "white" ? checkStatus.whiteInCheck : checkStatus.blackInCheck;
+  const activeInCheckmate = activeSide === "white" ? checkStatus.whiteInCheckmate : checkStatus.blackInCheckmate;
+
+  if (gameWinner) {
+    statusIndicator.textContent = `${capitalize(gameWinner)} wins by checkmate!`;
+    statusIndicator.classList.add("warning");
+    return;
+  }
+
+  if (activeInCheckmate) {
+    statusIndicator.textContent = `${capitalize(activeSide)} is in checkmate`;
+    statusIndicator.classList.add("warning");
+  } else if (activeInCheck) {
+    statusIndicator.textContent = `${capitalize(activeSide)} is in check`;
+    statusIndicator.classList.add("warning");
+  } else {
+    statusIndicator.textContent = `${capitalize(activeSide)} is safe`;
+    statusIndicator.classList.remove("warning");
+  }
+}
+
 function updateSwapButton() {
   if (!swapButton) {
     return;
@@ -258,6 +287,7 @@ function renderBoard() {
   }
 
   updateTurnIndicator();
+  updateStatusIndicator();
   updateSwapButton();
   updateSwapControls();
   updateSetupControls();
@@ -525,25 +555,23 @@ function handleDrop(event) {
 
   const pieceType = movedPiece ? movedPiece[1].toLowerCase() : "";
 
-  // Use piece-specific rules for pawns, knights, and bishops, and the basic rule for all other pieces.
   const isMoveAllowed = pieceType === "p"
     ? canPawnMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
     : pieceType === "n"
       ? canKnightMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol)
-    : pieceType === "b"
-      ? canBishopMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
-    : pieceType === "r"
-      ? canRookMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
-    : pieceType === "q"
-      ? canQueenMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
-    : pieceType === "k"
-      ? canKingMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol, boardState)
-    : pieceType === "z"
-      ? canWizardMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
-        : canMoveTo(movedPiece, targetPiece);
-      
+      : pieceType === "b"
+        ? canBishopMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+        : pieceType === "r"
+          ? canRookMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+          : pieceType === "q"
+            ? canQueenMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+            : pieceType === "k"
+              ? canKingMove(movedPiece, targetPiece, sourceRow, sourceCol, targetRow, targetCol, boardState)
+              : pieceType === "z"
+                ? canWizardMove(movedPiece, targetPiece, boardState, sourceRow, sourceCol, targetRow, targetCol)
+                : canMoveTo(movedPiece, targetPiece);
 
-  if (!isMoveAllowed) {
+  if (!isMoveAllowed || !isMoveLegal(boardState, sourceRow, sourceCol, targetRow, targetCol, currentTurn)) {
     clearHighlight();
     return;
   }
@@ -577,9 +605,7 @@ function handleDrop(event) {
   }
 
   if (gameWinner) {
-    const winReason = kingCaptureWinner ? "capturing the king" : "checkmate";
-    window.alert(`${capitalize(gameWinner)} wins by ${winReason}!`);
-    resetToDefaultBoard();
+    renderBoard();
     return;
   }
 
@@ -646,7 +672,9 @@ function highlightLegalMoves(sourceRow, sourceCol) {
                     ? canWizardMove(pieceCode, targetPiece, boardState, sourceRow, sourceCol, tr, tc)
                     : canMoveTo(pieceCode, targetPiece);
 
-      if (isAllowed) {
+      const isLegal = isAllowed && isMoveLegal(boardState, sourceRow, sourceCol, tr, tc, currentTurn);
+
+      if (isLegal) {
         const file = String.fromCharCode(97 + tc);
         const rank = 8 - tr;
         const squareEl = document.getElementById(`${file}${rank}`);

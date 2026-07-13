@@ -10,6 +10,7 @@
     <main class="app-shell">
       <h1 class="app-title">Interactive Chess Board</h1>
       <p id="turn-indicator" class="turn-indicator">White to move</p>
+      <p id="status-indicator" class="status-indicator">White is safe</p>
       <div class="board-actions">
         <button id="setup-mode-button" class="swap-button" type="button">Custom Setup</button>
         <button id="reset-board-button" class="swap-button" type="button">Reset Board</button>
@@ -35,6 +36,7 @@
     <script>
       const cacheBuster = Date.now();
       document.write('<script src="chessRules.js?v=' + cacheBuster + '"><\/script>');
+      document.write('<script src="chessmovement.js?v=' + cacheBuster + '"><\/script>');
       document.write('<script src="main.js?v=' + cacheBuster + '"><\/script>');
     </script>
   </body>
