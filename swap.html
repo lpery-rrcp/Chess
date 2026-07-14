@@ -28,6 +28,11 @@
           <button class="setup-piece-button" data-setup-piece="z" type="button">Wizard</button>
           <button class="setup-piece-button" data-setup-piece="clear" type="button">Clear</button>
         </div>
+        <div class="preset-controls">
+          <input id="preset-name-input" class="swap-select" type="text" placeholder="Preset name" />
+          <button id="save-preset-button" class="swap-button" type="button">Save setup</button>
+        </div>
+        <div id="preset-list" class="preset-list"></div>
         <button id="default-board-button" class="swap-button" type="button">Default Board</button>
       </div>
       <div id="bulk-swap-controls" class="swap-controls">
@@ -73,6 +78,7 @@
       const cacheBuster = Date.now();
       document.write('<script src="chessRules.js?v=' + cacheBuster + '"><\/script>');
       document.write('<script src="chessmovement.js?v=' + cacheBuster + '"><\/script>');
+      document.write('<script src="boardSetup.js?v=' + cacheBuster + '"><\/script>');
       document.write('<script src="main.js?v=' + cacheBuster + '"><\/script>');
     </script>
   </body>

@@ -18,6 +18,7 @@ const pieceNames = {
 
 const STORAGE_KEY = "chess-board-state";
 const STORAGE_VERSION = 1;
+const PRESET_STORAGE_KEY = "chess-board-presets";
 
 const initialBoard = [
   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -43,6 +44,7 @@ let selectedSwapSide = "white";
 let selectedSwapFrom = "r";
 let selectedSwapTo = "z";
 let gameWinner = null;
+let savedBoardPresets = [];
 
 const swapControls = document.getElementById("bulk-swap-controls");
 const swapAllButton = document.getElementById("swap-all-button");
@@ -85,6 +87,104 @@ function saveBoardState() {
   }
 }
 
+function loadPersistedBoardPresets() {
+  try {
+    const storedPresets = localStorage.getItem(PRESET_STORAGE_KEY);
+    if (!storedPresets) {
+      return;
+    }
+
+    const parsedPresets = JSON.parse(storedPresets);
+    if (Array.isArray(parsedPresets)) {
+      savedBoardPresets = parsedPresets.filter((preset) => preset?.name && preset?.side && Array.isArray(preset?.boardState));
+    }
+  } catch (error) {
+    console.warn("Unable to restore board presets", error);
+  }
+}
+
+function saveBoardPresets() {
+  try {
+    localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(savedBoardPresets));
+  } catch (error) {
+    console.warn("Unable to save board presets", error);
+  }
+}
+
+function saveCurrentBoardPreset() {
+  const input = document.getElementById("preset-name-input");
+  const presetName = input?.value?.trim();
+
+  if (!presetName) {
+    return;
+  }
+
+  const preset = createBoardPreset(presetName, boardState, selectedSetupSide);
+  if (!preset) {
+    return;
+  }
+
+  savedBoardPresets = saveBoardPreset(savedBoardPresets, preset);
+  saveBoardPresets();
+
+  if (input) {
+    input.value = "";
+  }
+
+  renderBoard();
+}
+
+function applyPresetToBoard(preset, targetSide = selectedSetupSide) {
+  if (!preset?.boardState) {
+    return;
+  }
+
+  boardState = preset.boardState.map((row) => [...row]);
+  currentTurn = "white";
+  hasGameStarted = false;
+  gameWinner = null;
+
+  if (targetSide === "white" || targetSide === "black") {
+    selectedSetupSide = targetSide;
+  }
+
+  renderBoard();
+}
+
+function renderPresetList() {
+  const presetList = document.getElementById("preset-list");
+  if (!presetList) {
+    return;
+  }
+
+  presetList.innerHTML = "";
+
+  if (!savedBoardPresets.length) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "swap-help";
+    emptyState.textContent = "No saved setups yet.";
+    presetList.appendChild(emptyState);
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.className = "preset-list-items";
+
+  savedBoardPresets.forEach((preset) => {
+    const button = document.createElement("button");
+    button.className = "swap-button";
+    button.type = "button";
+    button.textContent = preset.name;
+    button.dataset.presetName = preset.name;
+    button.addEventListener("click", () => {
+      applyPresetToBoard(preset, selectedSetupSide);
+    });
+    list.appendChild(button);
+  });
+
+  presetList.appendChild(list);
+}
+
 function isProtectedPieceCode(pieceCode) {
   if (!pieceCode) {
     return false;
@@ -125,6 +225,7 @@ if (resetBoardButton) {
 }
 
 loadPersistedBoardState();
+loadPersistedBoardPresets();
 renderBoard();
 
 if (pageMode === "game") {
@@ -291,6 +392,7 @@ function renderBoard() {
   updateSwapButton();
   updateSwapControls();
   updateSetupControls();
+  renderPresetList();
   saveBoardState();
 }
 
@@ -366,6 +468,19 @@ function handleSetupControlsClick(event) {
     return;
   }
 
+  const savePresetButton = event.target.closest("#save-preset-button");
+  if (savePresetButton) {
+    saveCurrentBoardPreset();
+    return;
+  }
+
+  const presetButton = event.target.closest("[data-preset-name]");
+  if (presetButton) {
+    const preset = savedBoardPresets.find((entry) => entry.name === presetButton.dataset.presetName);
+    if (preset) {
+      applyPresetToBoard(preset, selectedSetupSide);
+    }
+  }
 }
 
 function handleSetupPlacement(row, col) {
