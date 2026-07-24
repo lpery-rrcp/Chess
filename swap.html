@@ -18,6 +18,13 @@
       <p id="swap-help" class="swap-help">Choose a color, pick the piece to replace, and use the board to swap two eligible pieces or replace all matching pieces.</p>
       <div id="setup-controls" class="setup-controls" hidden>
         <div class="setup-side-picker">
+          <label class="swap-control">
+            <span>First to move</span>
+            <select id="start-color-select" class="swap-select">
+              <option value="white">White</option>
+              <option value="black">Black</option>
+            </select>
+          </label>
           <button class="setup-side-button active" data-setup-side="white" type="button">White</button>
           <button class="setup-side-button" data-setup-side="black" type="button">Black</button>
         </div>
@@ -79,6 +86,7 @@
       document.write('<script src="chessRules.js?v=' + cacheBuster + '"><\/script>');
       document.write('<script src="chessmovement.js?v=' + cacheBuster + '"><\/script>');
       document.write('<script src="boardSetup.js?v=' + cacheBuster + '"><\/script>');
+      document.write('<script src="colors.js?v=' + cacheBuster + '"><\/script>');
       document.write('<script src="main.js?v=' + cacheBuster + '"><\/script>');
     </script>
   </body>

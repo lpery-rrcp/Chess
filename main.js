@@ -19,6 +19,7 @@ const pieceNames = {
 const STORAGE_KEY = "chess-board-state";
 const STORAGE_VERSION = 1;
 const PRESET_STORAGE_KEY = "chess-board-presets";
+const START_COLOR_STORAGE_KEY = "chess-start-color";
 
 const initialBoard = [
   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -34,6 +35,7 @@ const initialBoard = [
 let boardState = initialBoard.map((row) => [...row]);
 let draggedPiece = null;
 let currentTurn = "white";
+let startingColor = "white";
 let hasGameStarted = false;
 let isSwapMode = pageMode === "swap";
 let isSetupMode = false;
@@ -51,6 +53,7 @@ const swapAllButton = document.getElementById("swap-all-button");
 const startGameButton = document.getElementById("start-game-button");
 const defaultBoardButton = document.getElementById("default-board-button");
 const resetBoardButton = document.getElementById("reset-board-button");
+const startColorSelect = document.getElementById("start-color-select");
 
 function loadPersistedBoardState() {
   try {
@@ -68,8 +71,19 @@ function loadPersistedBoardState() {
       boardState = parsedState.boardState.map((row) => [...row]);
     }
 
+    if (parsedState?.startingColor) {
+      startingColor = chooseStartingColor(parsedState.startingColor);
+    } else {
+      const storedStartingColor = localStorage.getItem(START_COLOR_STORAGE_KEY);
+      if (storedStartingColor) {
+        startingColor = chooseStartingColor(storedStartingColor);
+      }
+    }
+
     if (parsedState?.currentTurn) {
-      currentTurn = parsedState.currentTurn;
+      currentTurn = chooseStartingColor(parsedState.currentTurn);
+    } else {
+      currentTurn = startingColor;
     }
   } catch (error) {
     console.warn("Unable to restore board state", error);
@@ -80,8 +94,9 @@ function saveBoardState() {
   try {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ version: STORAGE_VERSION, boardState, currentTurn })
+      JSON.stringify({ version: STORAGE_VERSION, boardState, currentTurn, startingColor })
     );
+    localStorage.setItem(START_COLOR_STORAGE_KEY, startingColor);
   } catch (error) {
     console.warn("Unable to save board state", error);
   }
@@ -140,7 +155,7 @@ function applyPresetToBoard(preset, targetSide = selectedSetupSide) {
   }
 
   boardState = preset.boardState.map((row) => [...row]);
-  currentTurn = "white";
+  currentTurn = startingColor;
   hasGameStarted = false;
   gameWinner = null;
 
@@ -222,6 +237,10 @@ if (defaultBoardButton) {
 
 if (resetBoardButton) {
   resetBoardButton.addEventListener("click", resetToDefaultBoard);
+}
+
+if (startColorSelect) {
+  startColorSelect.addEventListener("change", handleStartColorChange);
 }
 
 loadPersistedBoardState();
@@ -323,6 +342,10 @@ function updateSetupControls() {
   setupButton.textContent = isSetupMode ? "Done Setup" : "Custom Setup";
   setupButton.classList.toggle("active", isSetupMode);
 
+  if (startColorSelect) {
+    startColorSelect.value = startingColor;
+  }
+
   setupControls.querySelectorAll(".setup-side-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.setupSide === selectedSetupSide);
   });
@@ -332,7 +355,22 @@ function updateSetupControls() {
   });
 }
 
+function handleStartColorChange(event) {
+  const target = event.target;
+  if (!target || target.id !== "start-color-select") {
+    return;
+  }
+
+  startingColor = chooseStartingColor(target.value);
+  if (!hasGameStarted) {
+    currentTurn = startingColor;
+  }
+  saveBoardState();
+  renderBoard();
+}
+
 function startGame() {
+  currentTurn = startingColor;
   saveBoardState();
   window.location.href = "index.html";
 }
@@ -498,7 +536,7 @@ function handleSetupPlacement(row, col) {
 
 function resetToDefaultBoard() {
   boardState = initialBoard.map((row) => [...row]);
-  currentTurn = "white";
+  currentTurn = startingColor;
   hasGameStarted = false;
   isSetupMode = false;
   isSwapMode = pageMode === "swap";
